@@ -1,0 +1,26 @@
+{
+
+    "table1":[
+        {
+            "nom":"Coulibaly",
+            "prenom":"mamadou",
+            "address":"paris 20"
+        },
+        {
+            "nom":"Poissonnet",
+            "prenom":"Hugo",
+            "address":"Asnière"
+        },
+        {
+            "nom":"DUBOIS",
+            "prenom":"Alexandre",
+            "address":"Asnière"
+        }
+    ],
+
+ "table2":[
+     {"champs1":"valeur" ,  "champs2":"valeur", "champs3":"valeur" },
+     {"champs1":"valeur" ,  "champs2":"valeur", "champs3":"valeur" }
+  ]
+
+}

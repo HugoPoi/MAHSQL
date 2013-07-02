@@ -8,10 +8,10 @@
 %}
 
 chiffre   [0-9]
+nombre    [0-9]+
 entier    {chiffre}+
 exposant  [eE][+-]?{entier}
 valeur    {entier}("."{entier})?{exposant}?
-
 variable  [a-z]+[a-zA-Z0-9*]+
 
 %%
@@ -26,10 +26,10 @@ variable  [a-z]+[a-zA-Z0-9*]+
 ("or"|"OR") return OR;
 
 ("insert"|"INSERT")	return INSERT;
+("into"|"INTO")		return INTO;
 "("		return PARENTHLEFT;
 ")"		return PARENTHRIGHT;
 ("values"|"VALUES")		return VALUES;
-
 ("update"|"UPDATE")	return UPDATE;
 ("set"|"SET")	return SET;
 
@@ -45,11 +45,17 @@ variable  [a-z]+[a-zA-Z0-9*]+
 ("PRIMARY"|"primary")	return PRIMARY;
 ("KEY"|"key")	return KEY;
 
+{nombre}   {
+	yylval.nomb=atoll(yytext);
+    return(NOMBRE);
+    }
+
 {valeur}    {
 	yylval.val=atof(yytext);
     //printf("Valeur found: %d\n", yylval.val);
 	return(VALEUR);
     }
+
 {variable}    {
 	yylval.var=(char*)strdup(yytext);
     //printf("Variable found: %s\n", yylval.var);

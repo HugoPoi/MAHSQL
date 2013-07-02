@@ -40,7 +40,7 @@ item* push_list(char* var, item* l) {
 
 item* reverse_list(item* l) {
     item* tmpl = NULL;
-    item *itl = l;
+    item* itl = l;
     while (itl != NULL) {
         tmpl = push_list(itl->content, tmpl);
         itl = itl->next;
@@ -65,20 +65,21 @@ void reinit() {
 }
 
 char* print_list(item* l) {
-	char* res = NULL;
+    char* res = NULL;
     do {
-		if (res == NULL) {
-		if(l == NULL) return "";
-			res = (char*) malloc(sizeof(char)*2000);
-			res[0] = '\0';
-			res = strcat(res, l->content);
-		}else{
-			res = strcat(res, ", ");
-			res = strcat(res, l->content);
-			}
-		l = l->next;			
-	} while(l != NULL);
-	return res;
+        if (res == NULL) {
+        if(l == NULL) return "";
+            res = (char*) malloc(sizeof(char)*2000);
+            res[0] = '\0';
+            res = strcat(res, l->content);
+        }
+        else{
+            res = strcat(res, ", ");
+            res = strcat(res, l->content);
+            }
+        l = l->next;			
+    } while(l != NULL);
+    return res;
 }
 
 void print_select() {
@@ -91,7 +92,7 @@ void print_select() {
 void print_insert(char* tablename,char* field_names,char* variable_names) {
 	printf("Insert in %s\nFields:%s\nData:%s\n",tablename,field_names,variable_names);
 }
-print_update(char* tablename,char* field_names,char* variable_names){
+void print_update(char* tablename,char* field_names,char* variable_names){
 	printf("Insert in %s\nFields:%s\nData:%s\n",tablename,field_names,variable_names);
 }
 
@@ -100,12 +101,14 @@ print_update(char* tablename,char* field_names,char* variable_names){
 %union { 
 	double val;
 	char* var;
+    long nomb;
 }
 
 %token  <val> VALEUR
 %token  <var> VARIABLE
+%token  <nomb> NOMBRE
 %token SELECT FROM COMMA SEMICOLON WHERE EQUAL AND OR
-%token INSERT PARENTHLEFT PARENTHRIGHT VALUES
+%token INSERT INTO PARENTHLEFT PARENTHRIGHT VALUES
 %token UPDATE SET
 %token DELETE
 %token CREATE TABLE VARCHAR INTEGER CHAR PRIMARY KEY
@@ -144,7 +147,7 @@ SENTENCE:
 		| UPDATE_SENTENCE{
 				value_field_list = reverse_list(value_field_list);
 				attr_field_list = reverse_list(attr_field_list);
-				print_update(insert_tablename,print_list(attr_field_list),print_list(value_field_list))
+				print_update(insert_tablename,print_list(attr_field_list),print_list(value_field_list)) ;
 		}
 		| DELETE_SENTENCE{
 						field_list = reverse_list(field_list);
@@ -219,8 +222,8 @@ CONDITIONS:
 	;
 
 INSERT_SENTENCE:
-	INSERT VARIABLE PARENTHLEFT FIELD_LIST PARENTHRIGHT VALUES PARENTHLEFT VARIABLE_LIST PARENTHRIGHT{
-		insert_tablename = $2;
+	INSERT INTO VARIABLE PARENTHLEFT FIELD_LIST PARENTHRIGHT VALUES PARENTHLEFT VARIABLE_LIST PARENTHRIGHT{
+		insert_tablename = $3;
 	};
 	
 UPDATE_SENTENCE:
@@ -257,7 +260,7 @@ CREATE_LIST COMMA CREATE_FIELD
 ;
 
 CREATE_FIELD:
-VARIABLE TYPE PARENTHLEFT VALEUR PARENTHRIGHT
+VARIABLE TYPE PARENTHLEFT NOMBRE PARENTHRIGHT
 | VARIABLE TYPE | PRIMARY KEY PARENTHLEFT VARIABLE PARENTHRIGHT
 ;
 

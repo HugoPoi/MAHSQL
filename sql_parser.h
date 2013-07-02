@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.7.  */
+/* A Bison parser, made by GNU Bison 2.5.  */
 
 /* Bison interface for Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989-1990, 2000-2012 Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,15 +30,6 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_SQL_PARSER_TAB_H_INCLUDED
-# define YY_YY_SQL_PARSER_TAB_H_INCLUDED
-/* Enabling traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-#if YYDEBUG
-extern int yydebug;
-#endif
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -48,44 +39,50 @@ extern int yydebug;
    enum yytokentype {
      VALEUR = 258,
      VARIABLE = 259,
-     SELECT = 260,
-     FROM = 261,
-     COMMA = 262,
-     SEMICOLON = 263,
-     WHERE = 264,
-     EQUAL = 265,
-     AND = 266,
-     OR = 267,
-     INSERT = 268,
-     PARENTHLEFT = 269,
-     PARENTHRIGHT = 270,
-     VALUES = 271,
-     UPDATE = 272,
-     SET = 273,
-     DELETE = 274,
-     CREATE = 275,
-     TABLE = 276,
-     VARCHAR = 277,
-     INTEGER = 278,
-     CHAR = 279,
-     PRIMARY = 280,
-     KEY = 281
+     NOMBRE = 260,
+     SELECT = 261,
+     FROM = 262,
+     COMMA = 263,
+     SEMICOLON = 264,
+     WHERE = 265,
+     EQUAL = 266,
+     AND = 267,
+     OR = 268,
+     INSERT = 269,
+     INTO = 270,
+     PARENTHLEFT = 271,
+     PARENTHRIGHT = 272,
+     VALUES = 273,
+     UPDATE = 274,
+     SET = 275,
+     DELETE = 276,
+     CREATE = 277,
+     TABLE = 278,
+     VARCHAR = 279,
+     INTEGER = 280,
+     CHAR = 281,
+     PRIMARY = 282,
+     KEY = 283
    };
 #endif
+
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
 {
-/* Line 2058 of yacc.c  */
-#line 100 "sql_parser.y"
+
+/* Line 2068 of yacc.c  */
+#line 101 "sql_parser.y"
  
 	double val;
 	char* var;
+    long nomb;
 
 
-/* Line 2058 of yacc.c  */
-#line 89 "sql_parser.tab.h"
+
+/* Line 2068 of yacc.c  */
+#line 86 "sql_parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -94,18 +91,4 @@ typedef union YYSTYPE
 
 extern YYSTYPE yylval;
 
-#ifdef YYPARSE_PARAM
-#if defined __STDC__ || defined __cplusplus
-int yyparse (void *YYPARSE_PARAM);
-#else
-int yyparse ();
-#endif
-#else /* ! YYPARSE_PARAM */
-#if defined __STDC__ || defined __cplusplus
-int yyparse (void);
-#else
-int yyparse ();
-#endif
-#endif /* ! YYPARSE_PARAM */
 
-#endif /* !YY_YY_SQL_PARSER_TAB_H_INCLUDED  */

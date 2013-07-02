@@ -2,19 +2,20 @@
 CC=gcc
 CFLAGS=-Wall -ggdb
 LDFLAGS=-ggdb
+LFLAGS=-ljson #--std=gnu99
 EXEC=sql_parser.exe
 
 all: $(EXEC)
 
 
 $(EXEC): sql_parser.lex.o sql_parser.y.o
-		$(CC) -o $@ $^ $(LDFLAGS)
+		$(CC) -o $@ $^ $(LDFLAGS) $(LFLAGS)
 
 sql_parser.lex.o: sql_parser.lex.c
-		$(CC) -c $< -o $@ $(CFLAGS)
+		$(CC) -c $< -o $@ $(CFLAGS) $(LFLAGS)
 
 sql_parser.y.o: sql_parser.y.c
-		$(CC) -c $< -o $@ $(CFLAGS)
+		$(CC) -c $< -o $@ $(CFLAGS) $(LFLAGS)
 
 sql_parser.h: sql_parser.y
 		bison -d sql_parser.y
