@@ -24,6 +24,7 @@ variable  [a-z]+[a-zA-Z0-9*]+
 "="			return EQUAL;
 ("and"|"AND") return AND;
 ("or"|"OR") return OR;
+("EXIT"|"exit"|"quit"|"QUIT") return EXIT;
 
 ("insert"|"INSERT")	return INSERT;
 ("into"|"INTO")		return INTO;

@@ -1,0 +1,429 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+AND	sql_parser.h	/^     AND = 267,$/;"	e	enum:yytokentype
+AND	sql_parser.y.c	/^     AND = 267,$/;"	e	enum:yytokentype	file:
+ATTRIBUTIONS	sql_parser.y	/^ATTRIBUTIONS:$/;"	l
+BEGIN	sql_parser.lex.c	125;"	d	file:
+CC	makefile	/^CC=gcc$/;"	m
+CFLAGS	makefile	/^CFLAGS=-Wall -ggdb$/;"	m
+CHAR	sql_parser.h	/^     CHAR = 281,$/;"	e	enum:yytokentype
+CHAR	sql_parser.y.c	/^     CHAR = 281,$/;"	e	enum:yytokentype	file:
+COMMA	sql_parser.h	/^     COMMA = 263,$/;"	e	enum:yytokentype
+COMMA	sql_parser.y.c	/^     COMMA = 263,$/;"	e	enum:yytokentype	file:
+CONDITION	sql_parser.y	/^CONDITION:$/;"	l
+CONDITIONS	sql_parser.y	/^CONDITIONS:$/;"	l
+CREATE	sql_parser.h	/^     CREATE = 277,$/;"	e	enum:yytokentype
+CREATE	sql_parser.y.c	/^     CREATE = 277,$/;"	e	enum:yytokentype	file:
+CREATE_FIELD	sql_parser.y	/^CREATE_FIELD:$/;"	l
+CREATE_LIST	sql_parser.y	/^CREATE_LIST:$/;"	l
+CREATE_SENTENCE	sql_parser.y	/^CREATE_SENTENCE:$/;"	l
+Champs	sql_parser.old.y	/^Champs:$/;"	l
+DELETE	sql_parser.h	/^     DELETE = 276,$/;"	e	enum:yytokentype
+DELETE	sql_parser.y.c	/^     DELETE = 276,$/;"	e	enum:yytokentype	file:
+DELETE_SENTENCE	sql_parser.y	/^DELETE_SENTENCE:$/;"	l
+ECHO	sql_parser.lex.c	710;"	d	file:
+EOB_ACT_CONTINUE_SCAN	sql_parser.lex.c	168;"	d	file:
+EOB_ACT_END_OF_FILE	sql_parser.lex.c	169;"	d	file:
+EOB_ACT_LAST_MATCH	sql_parser.lex.c	170;"	d	file:
+EQUAL	sql_parser.h	/^     EQUAL = 266,$/;"	e	enum:yytokentype
+EQUAL	sql_parser.y.c	/^     EQUAL = 266,$/;"	e	enum:yytokentype	file:
+EXEC	makefile	/^EXEC=sql_parser.exe$/;"	m
+EXIT_SUCCESS	sql_parser.y.c	393;"	d	file:
+EXIT_SUCCESS	sql_parser.y.c	421;"	d	file:
+FIELD_LIST	sql_parser.y	/^FIELD_LIST:$/;"	l
+FLEXINT_H	sql_parser.lex.c	29;"	d	file:
+FLEX_BETA	sql_parser.lex.c	13;"	d	file:
+FLEX_SCANNER	sql_parser.lex.c	8;"	d	file:
+FROM	sql_parser.h	/^     FROM = 262,$/;"	e	enum:yytokentype
+FROM	sql_parser.y.c	/^     FROM = 262,$/;"	e	enum:yytokentype	file:
+INITIAL	sql_parser.lex.c	618;"	d	file:
+INSERT	sql_parser.h	/^     INSERT = 269,$/;"	e	enum:yytokentype
+INSERT	sql_parser.y.c	/^     INSERT = 269,$/;"	e	enum:yytokentype	file:
+INSERT_SENTENCE	sql_parser.y	/^INSERT_SENTENCE:$/;"	l
+INT16_MAX	sql_parser.lex.c	71;"	d	file:
+INT16_MIN	sql_parser.lex.c	62;"	d	file:
+INT32_MAX	sql_parser.lex.c	74;"	d	file:
+INT32_MIN	sql_parser.lex.c	65;"	d	file:
+INT8_MAX	sql_parser.lex.c	68;"	d	file:
+INT8_MIN	sql_parser.lex.c	59;"	d	file:
+INTEGER	sql_parser.h	/^     INTEGER = 280,$/;"	e	enum:yytokentype
+INTEGER	sql_parser.y.c	/^     INTEGER = 280,$/;"	e	enum:yytokentype	file:
+INTO	sql_parser.h	/^     INTO = 270,$/;"	e	enum:yytokentype
+INTO	sql_parser.y.c	/^     INTO = 270,$/;"	e	enum:yytokentype	file:
+Input	sql_parser.old.y	/^Input:$/;"	l
+KEY	sql_parser.h	/^     KEY = 283$/;"	e	enum:yytokentype
+KEY	sql_parser.y.c	/^     KEY = 283$/;"	e	enum:yytokentype	file:
+LDFLAGS	makefile	/^LDFLAGS=-ggdb$/;"	m
+LFLAGS	makefile	/^LFLAGS=-ljson #--std=gnu99$/;"	m
+NOMBRE	sql_parser.h	/^     NOMBRE = 260,$/;"	e	enum:yytokentype
+NOMBRE	sql_parser.y.c	/^     NOMBRE = 260,$/;"	e	enum:yytokentype	file:
+OR	sql_parser.h	/^     OR = 268,$/;"	e	enum:yytokentype
+OR	sql_parser.y.c	/^     OR = 268,$/;"	e	enum:yytokentype	file:
+PARENTHLEFT	sql_parser.h	/^     PARENTHLEFT = 271,$/;"	e	enum:yytokentype
+PARENTHLEFT	sql_parser.y.c	/^     PARENTHLEFT = 271,$/;"	e	enum:yytokentype	file:
+PARENTHRIGHT	sql_parser.h	/^     PARENTHRIGHT = 272,$/;"	e	enum:yytokentype
+PARENTHRIGHT	sql_parser.y.c	/^     PARENTHRIGHT = 272,$/;"	e	enum:yytokentype	file:
+PRIMARY	sql_parser.h	/^     PRIMARY = 282,$/;"	e	enum:yytokentype
+PRIMARY	sql_parser.y.c	/^     PRIMARY = 282,$/;"	e	enum:yytokentype	file:
+REJECT	sql_parser.lex.c	604;"	d	file:
+Requete	sql_parser.old.y	/^Requete:$/;"	l
+SELECT	sql_parser.h	/^     SELECT = 261,$/;"	e	enum:yytokentype
+SELECT	sql_parser.y.c	/^     SELECT = 261,$/;"	e	enum:yytokentype	file:
+SELECT_SENTENCE	sql_parser.y	/^SELECT_SENTENCE:$/;"	l
+SEMICOLON	sql_parser.h	/^     SEMICOLON = 264,$/;"	e	enum:yytokentype
+SEMICOLON	sql_parser.y.c	/^     SEMICOLON = 264,$/;"	e	enum:yytokentype	file:
+SENTENCE	sql_parser.y	/^SENTENCE:$/;"	l
+SENTENCES	sql_parser.y	/^SENTENCES:$/;"	l
+SET	sql_parser.h	/^     SET = 275,$/;"	e	enum:yytokentype
+SET	sql_parser.y.c	/^     SET = 275,$/;"	e	enum:yytokentype	file:
+TABLE	sql_parser.h	/^     TABLE = 278,$/;"	e	enum:yytokentype
+TABLE	sql_parser.y.c	/^     TABLE = 278,$/;"	e	enum:yytokentype	file:
+TABLE_LIST	sql_parser.y	/^TABLE_LIST:$/;"	l
+TYPE	sql_parser.y	/^TYPE: $/;"	l
+Tables	sql_parser.old.y	/^Tables:$/;"	l
+UINT16_MAX	sql_parser.lex.c	80;"	d	file:
+UINT32_MAX	sql_parser.lex.c	83;"	d	file:
+UINT8_MAX	sql_parser.lex.c	77;"	d	file:
+UPDATE	sql_parser.h	/^     UPDATE = 274,$/;"	e	enum:yytokentype
+UPDATE	sql_parser.y.c	/^     UPDATE = 274,$/;"	e	enum:yytokentype	file:
+UPDATE_SENTENCE	sql_parser.y	/^UPDATE_SENTENCE:$/;"	l
+VALEUR	sql_parser.h	/^     VALEUR = 258,$/;"	e	enum:yytokentype
+VALEUR	sql_parser.y.c	/^     VALEUR = 258,$/;"	e	enum:yytokentype	file:
+VALUES	sql_parser.h	/^     VALUES = 273,$/;"	e	enum:yytokentype
+VALUES	sql_parser.y.c	/^     VALUES = 273,$/;"	e	enum:yytokentype	file:
+VARCHAR	sql_parser.h	/^     VARCHAR = 279,$/;"	e	enum:yytokentype
+VARCHAR	sql_parser.y.c	/^     VARCHAR = 279,$/;"	e	enum:yytokentype	file:
+VARIABLE	sql_parser.h	/^     VARIABLE = 259,$/;"	e	enum:yytokentype
+VARIABLE	sql_parser.y.c	/^     VARIABLE = 259,$/;"	e	enum:yytokentype	file:
+VARIABLE_LIST	sql_parser.y	/^VARIABLE_LIST:$/;"	l
+WHERE	sql_parser.h	/^     WHERE = 265,$/;"	e	enum:yytokentype
+WHERE	sql_parser.y.c	/^     WHERE = 265,$/;"	e	enum:yytokentype	file:
+YYABORT	sql_parser.y.c	747;"	d	file:
+YYACCEPT	sql_parser.y.c	746;"	d	file:
+YYBACKUP	sql_parser.y.c	768;"	d	file:
+YYBISON	sql_parser.y.c	44;"	d	file:
+YYBISON_VERSION	sql_parser.y.c	47;"	d	file:
+YYCASE_	sql_parser.y.c	1200;"	d	file:
+YYCASE_	sql_parser.y.c	1210;"	d	file:
+YYCOPY	sql_parser.y.c	487;"	d	file:
+YYCOPY	sql_parser.y.c	490;"	d	file:
+YYCOPY_NEEDED	sql_parser.y.c	462;"	d	file:
+YYDEBUG	sql_parser.y.c	206;"	d	file:
+YYDPRINTF	sql_parser.y.c	838;"	d	file:
+YYDPRINTF	sql_parser.y.c	987;"	d	file:
+YYEMPTY	sql_parser.y.c	743;"	d	file:
+YYEOF	sql_parser.y.c	744;"	d	file:
+YYERRCODE	sql_parser.y.c	786;"	d	file:
+YYERROR	sql_parser.y.c	748;"	d	file:
+YYERROR_VERBOSE	sql_parser.y.c	211;"	d	file:
+YYERROR_VERBOSE	sql_parser.y.c	212;"	d	file:
+YYERROR_VERBOSE	sql_parser.y.c	214;"	d	file:
+YYFAIL	sql_parser.y.c	758;"	d	file:
+YYFINAL	sql_parser.y.c	503;"	d	file:
+YYFPRINTF	sql_parser.y.c	835;"	d	file:
+YYFREE	sql_parser.y.c	432;"	d	file:
+YYID	sql_parser.y.c	/^YYID (int yyi)$/;"	f	file:
+YYID	sql_parser.y.c	356;"	d	file:
+YYINITDEPTH	sql_parser.y.c	996;"	d	file:
+YYLAST	sql_parser.y.c	505;"	d	file:
+YYLEX	sql_parser.y.c	825;"	d	file:
+YYLEX	sql_parser.y.c	827;"	d	file:
+YYLLOC_DEFAULT	sql_parser.y.c	795;"	d	file:
+YYLSP_NEEDED	sql_parser.y.c	62;"	d	file:
+YYMALLOC	sql_parser.y.c	425;"	d	file:
+YYMAXDEPTH	sql_parser.y.c	1007;"	d	file:
+YYMAXUTOK	sql_parser.y.c	518;"	d	file:
+YYNNTS	sql_parser.y.c	510;"	d	file:
+YYNRULES	sql_parser.y.c	512;"	d	file:
+YYNSTATES	sql_parser.y.c	514;"	d	file:
+YYNTOKENS	sql_parser.y.c	508;"	d	file:
+YYPACT_NINF	sql_parser.y.c	667;"	d	file:
+YYPOPSTACK	sql_parser.y.c	1371;"	d	file:
+YYPULL	sql_parser.y.c	59;"	d	file:
+YYPURE	sql_parser.y.c	53;"	d	file:
+YYPUSH	sql_parser.y.c	56;"	d	file:
+YYRECOVERING	sql_parser.y.c	766;"	d	file:
+YYRHSLOC	sql_parser.y.c	793;"	d	file:
+YYSIZE_MAXIMUM	sql_parser.y.c	333;"	d	file:
+YYSIZE_T	sql_parser.y.c	321;"	d	file:
+YYSIZE_T	sql_parser.y.c	323;"	d	file:
+YYSIZE_T	sql_parser.y.c	327;"	d	file:
+YYSIZE_T	sql_parser.y.c	329;"	d	file:
+YYSKELETON_NAME	sql_parser.y.c	50;"	d	file:
+YYSTACK_ALLOC	sql_parser.y.c	379;"	d	file:
+YYSTACK_ALLOC	sql_parser.y.c	383;"	d	file:
+YYSTACK_ALLOC	sql_parser.y.c	388;"	d	file:
+YYSTACK_ALLOC	sql_parser.y.c	411;"	d	file:
+YYSTACK_ALLOC_MAXIMUM	sql_parser.y.c	408;"	d	file:
+YYSTACK_ALLOC_MAXIMUM	sql_parser.y.c	414;"	d	file:
+YYSTACK_BYTES	sql_parser.y.c	458;"	d	file:
+YYSTACK_FREE	sql_parser.y.c	402;"	d	file:
+YYSTACK_FREE	sql_parser.y.c	412;"	d	file:
+YYSTACK_GAP_MAXIMUM	sql_parser.y.c	454;"	d	file:
+YYSTACK_RELOCATE	sql_parser.y.c	469;"	d	file:
+YYSTATE	sql_parser.lex.c	132;"	d	file:
+YYSTYPE	sql_parser.h	/^typedef union YYSTYPE$/;"	u
+YYSTYPE	sql_parser.h	/^} YYSTYPE;$/;"	t	typeref:union:YYSTYPE
+YYSTYPE	sql_parser.y.c	/^typedef union YYSTYPE$/;"	u	file:
+YYSTYPE	sql_parser.y.c	/^} YYSTYPE;$/;"	t	typeref:union:YYSTYPE	file:
+YYSTYPE_IS_DECLARED	sql_parser.h	89;"	d
+YYSTYPE_IS_DECLARED	sql_parser.y.c	278;"	d	file:
+YYSTYPE_IS_TRIVIAL	sql_parser.h	87;"	d
+YYSTYPE_IS_TRIVIAL	sql_parser.y.c	276;"	d	file:
+YYTABLES_NAME	sql_parser.lex.c	2036;"	d	file:
+YYTABLE_NINF	sql_parser.y.c	691;"	d	file:
+YYTERROR	sql_parser.y.c	785;"	d	file:
+YYTOKENTYPE	sql_parser.h	36;"	d
+YYTOKENTYPE	sql_parser.y.c	225;"	d	file:
+YYTOKEN_TABLE	sql_parser.y.c	219;"	d	file:
+YYTRANSLATE	sql_parser.y.c	520;"	d	file:
+YYUNDEFTOK	sql_parser.y.c	517;"	d	file:
+YYUSE	sql_parser.y.c	349;"	d	file:
+YYUSE	sql_parser.y.c	351;"	d	file:
+YY_	sql_parser.y.c	339;"	d	file:
+YY_	sql_parser.y.c	343;"	d	file:
+YY_AT_BOL	sql_parser.lex.c	339;"	d	file:
+YY_BREAK	sql_parser.lex.c	789;"	d	file:
+YY_BUFFER_EOF_PENDING	sql_parser.lex.c	255;"	d	file:
+YY_BUFFER_NEW	sql_parser.lex.c	243;"	d	file:
+YY_BUFFER_NORMAL	sql_parser.lex.c	244;"	d	file:
+YY_BUFFER_STATE	sql_parser.lex.c	/^typedef struct yy_buffer_state *YY_BUFFER_STATE;$/;"	t	typeref:struct:yy_buffer_state	file:
+YY_BUF_SIZE	sql_parser.lex.c	149;"	d	file:
+YY_BUF_SIZE	sql_parser.lex.c	151;"	d	file:
+YY_CHAR	sql_parser.lex.c	/^typedef unsigned char YY_CHAR;$/;"	t	file:
+YY_CURRENT_BUFFER	sql_parser.lex.c	271;"	d	file:
+YY_CURRENT_BUFFER_LVALUE	sql_parser.lex.c	278;"	d	file:
+YY_DECL	sql_parser.lex.c	777;"	d	file:
+YY_DECL_IS_OURS	sql_parser.lex.c	773;"	d	file:
+YY_DO_BEFORE_ACTION	sql_parser.lex.c	365;"	d	file:
+YY_END_OF_BUFFER	sql_parser.lex.c	373;"	d	file:
+YY_END_OF_BUFFER_CHAR	sql_parser.lex.c	140;"	d	file:
+YY_EXIT_FAILURE	sql_parser.lex.c	1834;"	d	file:
+YY_EXTRA_TYPE	sql_parser.lex.c	629;"	d	file:
+YY_FATAL_ERROR	sql_parser.lex.c	764;"	d	file:
+YY_FLEX_MAJOR_VERSION	sql_parser.lex.c	9;"	d	file:
+YY_FLEX_MINOR_VERSION	sql_parser.lex.c	10;"	d	file:
+YY_FLEX_SUBMINOR_VERSION	sql_parser.lex.c	11;"	d	file:
+YY_FLUSH_BUFFER	sql_parser.lex.c	307;"	d	file:
+YY_INPUT	sql_parser.lex.c	717;"	d	file:
+YY_INT_ALIGNED	sql_parser.lex.c	4;"	d	file:
+YY_LESS_LINENO	sql_parser.lex.c	172;"	d	file:
+YY_LOCATION_PRINT	sql_parser.y.c	818;"	d	file:
+YY_MORE_ADJ	sql_parser.lex.c	606;"	d	file:
+YY_NEW_FILE	sql_parser.lex.c	138;"	d	file:
+YY_NULL	sql_parser.lex.c	112;"	d	file:
+YY_NUM_RULES	sql_parser.lex.c	372;"	d	file:
+YY_READ_BUF_SIZE	sql_parser.lex.c	699;"	d	file:
+YY_READ_BUF_SIZE	sql_parser.lex.c	701;"	d	file:
+YY_REDUCE_PRINT	sql_parser.y.c	977;"	d	file:
+YY_REDUCE_PRINT	sql_parser.y.c	990;"	d	file:
+YY_RESTORE_YY_MORE_OFFSET	sql_parser.lex.c	607;"	d	file:
+YY_RULE_SETUP	sql_parser.lex.c	792;"	d	file:
+YY_SC_TO_UI	sql_parser.lex.c	119;"	d	file:
+YY_SKIP_YYWRAP	sql_parser.lex.c	342;"	d	file:
+YY_STACK_PRINT	sql_parser.y.c	939;"	d	file:
+YY_STACK_PRINT	sql_parser.y.c	989;"	d	file:
+YY_START	sql_parser.lex.c	131;"	d	file:
+YY_START_STACK_INCR	sql_parser.lex.c	759;"	d	file:
+YY_STATE_BUF_SIZE	sql_parser.lex.c	157;"	d	file:
+YY_STATE_EOF	sql_parser.lex.c	135;"	d	file:
+YY_STRUCT_YY_BUFFER_STATE	sql_parser.lex.c	196;"	d	file:
+YY_SYMBOL_PRINT	sql_parser.y.c	844;"	d	file:
+YY_SYMBOL_PRINT	sql_parser.y.c	988;"	d	file:
+YY_TYPEDEF_YY_BUFFER_STATE	sql_parser.lex.c	160;"	d	file:
+YY_TYPEDEF_YY_SIZE_T	sql_parser.lex.c	191;"	d	file:
+YY_USER_ACTION	sql_parser.lex.c	784;"	d	file:
+YY_USE_CONST	sql_parser.lex.c	100;"	d	file:
+YY_USE_CONST	sql_parser.lex.c	93;"	d	file:
+__STDC_LIMIT_MACROS	sql_parser.lex.c	39;"	d	file:
+alloca	sql_parser.y.c	386;"	d	file:
+attr_field_list	sql_parser.y.c	/^item* attr_field_list = NULL;$/;"	v
+condition_list	sql_parser.y.c	/^item* condition_list = NULL;$/;"	v
+content	sql_parser.y.c	/^	char* content;$/;"	m	struct:list_el	file:
+create_table_data_struct	sql_parser.y.c	/^item* create_table_data_struct = NULL ;$/;"	v
+erase_list	sql_parser.y.c	/^void erase_list(item* l) {	$/;"	f
+field_list	sql_parser.y.c	/^item* field_list = NULL;$/;"	v
+file_sql	sql_parser.y.c	/^static FILE* file_sql ;$/;"	v	file:
+flex_int16_t	sql_parser.lex.c	/^typedef int16_t flex_int16_t;$/;"	t	file:
+flex_int16_t	sql_parser.lex.c	/^typedef short int flex_int16_t;$/;"	t	file:
+flex_int32_t	sql_parser.lex.c	/^typedef int flex_int32_t;$/;"	t	file:
+flex_int32_t	sql_parser.lex.c	/^typedef int32_t flex_int32_t;$/;"	t	file:
+flex_int8_t	sql_parser.lex.c	/^typedef int8_t flex_int8_t;$/;"	t	file:
+flex_int8_t	sql_parser.lex.c	/^typedef signed char flex_int8_t;$/;"	t	file:
+flex_uint16_t	sql_parser.lex.c	/^typedef uint16_t flex_uint16_t;$/;"	t	file:
+flex_uint16_t	sql_parser.lex.c	/^typedef unsigned short int flex_uint16_t;$/;"	t	file:
+flex_uint32_t	sql_parser.lex.c	/^typedef uint32_t flex_uint32_t;$/;"	t	file:
+flex_uint32_t	sql_parser.lex.c	/^typedef unsigned int flex_uint32_t;$/;"	t	file:
+flex_uint8_t	sql_parser.lex.c	/^typedef uint8_t flex_uint8_t;$/;"	t	file:
+flex_uint8_t	sql_parser.lex.c	/^typedef unsigned char flex_uint8_t; $/;"	t	file:
+insert_tablename	sql_parser.y.c	/^char* insert_tablename;$/;"	v
+item	sql_parser.y.c	/^typedef struct list_el item;$/;"	t	typeref:struct:list_el	file:
+list_el	sql_parser.y.c	/^struct list_el {$/;"	s	file:
+main	sql_parser.y.c	/^int main(int argc , char** argv) {$/;"	f
+next	sql_parser.y.c	/^	struct list_el* next;$/;"	m	struct:list_el	typeref:struct:list_el::list_el	file:
+nomb	sql_parser.h	/^    int nomb;$/;"	m	union:YYSTYPE
+nomb	sql_parser.y.c	/^    int nomb;$/;"	m	union:YYSTYPE	file:
+numbers_field	sql_parser.y.c	/^item* numbers_field = NULL ;$/;"	v
+print_create_table2	sql_parser.y.c	/^void print_create_table2( ){$/;"	f
+print_insert	sql_parser.y.c	/^void print_insert(char* tablename,char* field_names,char* variable_names) {$/;"	f
+print_list	sql_parser.y.c	/^char* print_list(item* l) {$/;"	f
+print_select	sql_parser.y.c	/^void print_select() {$/;"	f
+print_update	sql_parser.y.c	/^void print_update(char* tablename,char* field_names,char* variable_names){$/;"	f
+push_list	sql_parser.y.c	/^item* push_list(char* var, item* l) {$/;"	f
+reinit	sql_parser.y.c	/^void reinit() {$/;"	f
+reverse_list	sql_parser.y.c	/^item* reverse_list(item* l) {$/;"	f
+short	sql_parser.y.c	289;"	d	file:
+table_list	sql_parser.y.c	/^item* table_list = NULL;$/;"	v
+unput	sql_parser.lex.c	188;"	d	file:
+val	sql_parser.h	/^	double val;$/;"	m	union:YYSTYPE
+val	sql_parser.y.c	/^	double val;$/;"	m	union:YYSTYPE	file:
+value_field_list	sql_parser.y.c	/^item* value_field_list = NULL;$/;"	v
+var	sql_parser.h	/^	char* var;$/;"	m	union:YYSTYPE
+var	sql_parser.y.c	/^	char* var;$/;"	m	union:YYSTYPE	file:
+variable_list	sql_parser.y.c	/^item* variable_list = NULL;$/;"	v
+yy_accept	sql_parser.lex.c	/^static yyconst flex_int16_t yy_accept[182] =$/;"	v	file:
+yy_at_bol	sql_parser.lex.c	/^	int yy_at_bol;$/;"	m	struct:yy_buffer_state	file:
+yy_base	sql_parser.lex.c	/^static yyconst flex_int16_t yy_base[182] =$/;"	v	file:
+yy_bs_column	sql_parser.lex.c	/^    int yy_bs_column; \/**< The column count. *\/$/;"	m	struct:yy_buffer_state	file:
+yy_bs_lineno	sql_parser.lex.c	/^    int yy_bs_lineno; \/**< The line count. *\/$/;"	m	struct:yy_buffer_state	file:
+yy_buf_pos	sql_parser.lex.c	/^	char *yy_buf_pos;		\/* current position in input buffer *\/$/;"	m	struct:yy_buffer_state	file:
+yy_buf_size	sql_parser.lex.c	/^	yy_size_t yy_buf_size;$/;"	m	struct:yy_buffer_state	file:
+yy_buffer_stack	sql_parser.lex.c	/^static YY_BUFFER_STATE * yy_buffer_stack = 0; \/**< Stack as an array. *\/$/;"	v	file:
+yy_buffer_stack_max	sql_parser.lex.c	/^static size_t yy_buffer_stack_max = 0; \/**< capacity of stack. *\/$/;"	v	file:
+yy_buffer_stack_top	sql_parser.lex.c	/^static size_t yy_buffer_stack_top = 0; \/**< index of top of stack. *\/$/;"	v	file:
+yy_buffer_state	sql_parser.lex.c	/^struct yy_buffer_state$/;"	s	file:
+yy_buffer_status	sql_parser.lex.c	/^	int yy_buffer_status;$/;"	m	struct:yy_buffer_state	file:
+yy_c_buf_p	sql_parser.lex.c	/^static char *yy_c_buf_p = (char *) 0;$/;"	v	file:
+yy_ch_buf	sql_parser.lex.c	/^	char *yy_ch_buf;		\/* input buffer *\/$/;"	m	struct:yy_buffer_state	file:
+yy_chk	sql_parser.lex.c	/^static yyconst flex_int16_t yy_chk[414] =$/;"	v	file:
+yy_create_buffer	sql_parser.lex.c	/^    YY_BUFFER_STATE yy_create_buffer  (FILE * file, int  size )$/;"	f
+yy_def	sql_parser.lex.c	/^static yyconst flex_int16_t yy_def[182] =$/;"	v	file:
+yy_delete_buffer	sql_parser.lex.c	/^    void yy_delete_buffer (YY_BUFFER_STATE  b )$/;"	f
+yy_did_buffer_switch_on_eof	sql_parser.lex.c	/^static int yy_did_buffer_switch_on_eof;$/;"	v	file:
+yy_ec	sql_parser.lex.c	/^static yyconst flex_int32_t yy_ec[256] =$/;"	v	file:
+yy_fatal_error	sql_parser.lex.c	/^static void yy_fatal_error (yyconst char* msg )$/;"	f	file:
+yy_fill_buffer	sql_parser.lex.c	/^	int yy_fill_buffer;$/;"	m	struct:yy_buffer_state	file:
+yy_flex_debug	sql_parser.lex.c	/^int yy_flex_debug = 0;$/;"	v
+yy_flex_strlen	sql_parser.lex.c	/^static int yy_flex_strlen (yyconst char * s )$/;"	f	file:
+yy_flex_strncpy	sql_parser.lex.c	/^static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )$/;"	f	file:
+yy_flush_buffer	sql_parser.lex.c	/^    void yy_flush_buffer (YY_BUFFER_STATE  b )$/;"	f
+yy_get_next_buffer	sql_parser.lex.c	/^static int yy_get_next_buffer (void)$/;"	f	file:
+yy_get_previous_state	sql_parser.lex.c	/^    static yy_state_type yy_get_previous_state (void)$/;"	f	file:
+yy_hold_char	sql_parser.lex.c	/^static char yy_hold_char;$/;"	v	file:
+yy_init	sql_parser.lex.c	/^static int yy_init = 0;		\/* whether we need to initialize *\/$/;"	v	file:
+yy_init_buffer	sql_parser.lex.c	/^    static void yy_init_buffer  (YY_BUFFER_STATE  b, FILE * file )$/;"	f	file:
+yy_init_globals	sql_parser.lex.c	/^static int yy_init_globals (void)$/;"	f	file:
+yy_input_file	sql_parser.lex.c	/^	FILE *yy_input_file;$/;"	m	struct:yy_buffer_state	file:
+yy_is_interactive	sql_parser.lex.c	/^	int yy_is_interactive;$/;"	m	struct:yy_buffer_state	file:
+yy_is_our_buffer	sql_parser.lex.c	/^	int yy_is_our_buffer;$/;"	m	struct:yy_buffer_state	file:
+yy_last_accepting_cpos	sql_parser.lex.c	/^static char *yy_last_accepting_cpos;$/;"	v	file:
+yy_last_accepting_state	sql_parser.lex.c	/^static yy_state_type yy_last_accepting_state;$/;"	v	file:
+yy_load_buffer_state	sql_parser.lex.c	/^static void yy_load_buffer_state  (void)$/;"	f	file:
+yy_meta	sql_parser.lex.c	/^static yyconst flex_int32_t yy_meta[57] =$/;"	v	file:
+yy_n_chars	sql_parser.lex.c	/^	int yy_n_chars;$/;"	m	struct:yy_buffer_state	file:
+yy_n_chars	sql_parser.lex.c	/^static int yy_n_chars;		\/* number of characters read into yy_ch_buf *\/$/;"	v	file:
+yy_new_buffer	sql_parser.lex.c	317;"	d	file:
+yy_nxt	sql_parser.lex.c	/^	flex_int32_t yy_nxt;$/;"	m	struct:yy_trans_info	file:
+yy_nxt	sql_parser.lex.c	/^static yyconst flex_int16_t yy_nxt[414] =$/;"	v	file:
+yy_reduce_print	sql_parser.y.c	/^yy_reduce_print (YYSTYPE *yyvsp, int yyrule)$/;"	f	file:
+yy_scan_buffer	sql_parser.lex.c	/^YY_BUFFER_STATE yy_scan_buffer  (char * base, yy_size_t  size )$/;"	f
+yy_scan_bytes	sql_parser.lex.c	/^YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )$/;"	f
+yy_scan_string	sql_parser.lex.c	/^YY_BUFFER_STATE yy_scan_string (yyconst char * yystr )$/;"	f
+yy_set_bol	sql_parser.lex.c	329;"	d	file:
+yy_set_interactive	sql_parser.lex.c	319;"	d	file:
+yy_size_t	sql_parser.lex.c	/^typedef size_t yy_size_t;$/;"	t	file:
+yy_stack_print	sql_parser.y.c	/^yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)$/;"	f	file:
+yy_start	sql_parser.lex.c	/^static int yy_start = 0;	\/* start state number *\/$/;"	v	file:
+yy_state_type	sql_parser.lex.c	/^typedef int yy_state_type;$/;"	t	file:
+yy_switch_to_buffer	sql_parser.lex.c	/^    void yy_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )$/;"	f
+yy_symbol_print	sql_parser.y.c	/^yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)$/;"	f	file:
+yy_symbol_value_print	sql_parser.y.c	/^yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep)$/;"	f	file:
+yy_trans_info	sql_parser.lex.c	/^struct yy_trans_info$/;"	s	file:
+yy_try_NUL_trans	sql_parser.lex.c	/^    static yy_state_type yy_try_NUL_trans  (yy_state_type yy_current_state )$/;"	f	file:
+yy_verify	sql_parser.lex.c	/^	flex_int32_t yy_verify;$/;"	m	struct:yy_trans_info	file:
+yyalloc	sql_parser.lex.c	/^void *yyalloc (yy_size_t  size )$/;"	f
+yyalloc	sql_parser.y.c	/^union yyalloc$/;"	u	file:
+yychar	sql_parser.y.c	/^int yychar;$/;"	v
+yycheck	sql_parser.y.c	/^static const yytype_int8 yycheck[] =$/;"	v	file:
+yyclearin	sql_parser.y.c	742;"	d	file:
+yyconst	sql_parser.lex.c	106;"	d	file:
+yyconst	sql_parser.lex.c	108;"	d	file:
+yydebug	sql_parser.y.c	/^int yydebug;$/;"	v
+yydefact	sql_parser.y.c	/^static const yytype_uint8 yydefact[] =$/;"	v	file:
+yydefgoto	sql_parser.y.c	/^static const yytype_int8 yydefgoto[] =$/;"	v	file:
+yydestruct	sql_parser.y.c	/^yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)$/;"	f	file:
+yyensure_buffer_stack	sql_parser.lex.c	/^static void yyensure_buffer_stack (void)$/;"	f	file:
+yyerrok	sql_parser.y.c	741;"	d	file:
+yyerror	sql_parser.y.c	/^int yyerror(char *s) {$/;"	f
+yyfree	sql_parser.lex.c	/^void yyfree (void * ptr )$/;"	f
+yyget_debug	sql_parser.lex.c	/^int yyget_debug  (void)$/;"	f
+yyget_in	sql_parser.lex.c	/^FILE *yyget_in  (void)$/;"	f
+yyget_leng	sql_parser.lex.c	/^int yyget_leng  (void)$/;"	f
+yyget_lineno	sql_parser.lex.c	/^int yyget_lineno  (void)$/;"	f
+yyget_out	sql_parser.lex.c	/^FILE *yyget_out  (void)$/;"	f
+yyget_text	sql_parser.lex.c	/^char *yyget_text  (void)$/;"	f
+yyin	sql_parser.lex.c	/^FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;$/;"	v
+yyinput	sql_parser.lex.c	/^    static int yyinput (void)$/;"	f	file:
+yyleng	sql_parser.lex.c	/^int yyleng;$/;"	v
+yyless	sql_parser.lex.c	175;"	d	file:
+yyless	sql_parser.lex.c	1845;"	d	file:
+yyless	sql_parser.lex.c	1846;"	d	file:
+yylex_destroy	sql_parser.lex.c	/^int yylex_destroy  (void)$/;"	f
+yylineno	sql_parser.lex.c	/^int yylineno = 1;$/;"	v
+yylval	sql_parser.y.c	/^YYSTYPE yylval;$/;"	v
+yymore	sql_parser.lex.c	605;"	d	file:
+yynerrs	sql_parser.y.c	/^int yynerrs;$/;"	v
+yyout	sql_parser.lex.c	/^FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;$/;"	v
+yypact	sql_parser.y.c	/^static const yytype_int8 yypact[] =$/;"	v	file:
+yypact_value_is_default	sql_parser.y.c	706;"	d	file:
+yyparse	sql_parser.y.c	/^yyparse (void *YYPARSE_PARAM)$/;"	f
+yypgoto	sql_parser.y.c	/^static const yytype_int8 yypgoto[] =$/;"	v	file:
+yypop_buffer_state	sql_parser.lex.c	/^void yypop_buffer_state (void)$/;"	f
+yyprhs	sql_parser.y.c	/^static const yytype_uint8 yyprhs[] =$/;"	v	file:
+yypush_buffer_state	sql_parser.lex.c	/^void yypush_buffer_state (YY_BUFFER_STATE new_buffer )$/;"	f
+yyr1	sql_parser.y.c	/^static const yytype_uint8 yyr1[] =$/;"	v	file:
+yyr2	sql_parser.y.c	/^static const yytype_uint8 yyr2[] =$/;"	v	file:
+yyrealloc	sql_parser.lex.c	/^void *yyrealloc  (void * ptr, yy_size_t  size )$/;"	f
+yyrestart	sql_parser.lex.c	/^    void yyrestart  (FILE * input_file )$/;"	f
+yyrhs	sql_parser.y.c	/^static const yytype_int8 yyrhs[] =$/;"	v	file:
+yyrline	sql_parser.y.c	/^static const yytype_uint16 yyrline[] =$/;"	v	file:
+yyset_debug	sql_parser.lex.c	/^void yyset_debug (int  bdebug )$/;"	f
+yyset_in	sql_parser.lex.c	/^void yyset_in (FILE *  in_str )$/;"	f
+yyset_lineno	sql_parser.lex.c	/^void yyset_lineno (int  line_number )$/;"	f
+yyset_out	sql_parser.lex.c	/^void yyset_out (FILE *  out_str )$/;"	f
+yyss_alloc	sql_parser.y.c	/^  yytype_int16 yyss_alloc;$/;"	m	union:yyalloc	file:
+yystos	sql_parser.y.c	/^static const yytype_uint8 yystos[] =$/;"	v	file:
+yystpcpy	sql_parser.y.c	/^yystpcpy (char *yydest, const char *yysrc)$/;"	f	file:
+yystpcpy	sql_parser.y.c	1038;"	d	file:
+yystrlen	sql_parser.y.c	/^yystrlen (const char *yystr)$/;"	f	file:
+yystrlen	sql_parser.y.c	1015;"	d	file:
+yystype	sql_parser.h	88;"	d
+yystype	sql_parser.y.c	277;"	d	file:
+yysyntax_error	sql_parser.y.c	/^yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,$/;"	f	file:
+yytable	sql_parser.y.c	/^static const yytype_uint8 yytable[] =$/;"	v	file:
+yytable_value_is_error	sql_parser.y.c	709;"	d	file:
+yyterminate	sql_parser.lex.c	754;"	d	file:
+yytext	sql_parser.lex.c	/^char *yytext;$/;"	v
+yytext_ptr	sql_parser.lex.c	355;"	d	file:
+yytname	sql_parser.y.c	/^static const char *const yytname[] =$/;"	v	file:
+yytnamerr	sql_parser.y.c	/^yytnamerr (char *yyres, const char *yystr)$/;"	f	file:
+yytokentype	sql_parser.h	/^   enum yytokentype {$/;"	g
+yytokentype	sql_parser.y.c	/^   enum yytokentype {$/;"	g	file:
+yytoknum	sql_parser.y.c	/^static const yytype_uint16 yytoknum[] =$/;"	v	file:
+yytranslate	sql_parser.y.c	/^static const yytype_uint8 yytranslate[] =$/;"	v	file:
+yytype_int16	sql_parser.y.c	/^typedef YYTYPE_INT16 yytype_int16;$/;"	t	file:
+yytype_int16	sql_parser.y.c	/^typedef short int yytype_int16;$/;"	t	file:
+yytype_int8	sql_parser.y.c	/^typedef YYTYPE_INT8 yytype_int8;$/;"	t	file:
+yytype_int8	sql_parser.y.c	/^typedef short int yytype_int8;$/;"	t	file:
+yytype_int8	sql_parser.y.c	/^typedef signed char yytype_int8;$/;"	t	file:
+yytype_uint16	sql_parser.y.c	/^typedef YYTYPE_UINT16 yytype_uint16;$/;"	t	file:
+yytype_uint16	sql_parser.y.c	/^typedef unsigned short int yytype_uint16;$/;"	t	file:
+yytype_uint8	sql_parser.y.c	/^typedef YYTYPE_UINT8 yytype_uint8;$/;"	t	file:
+yytype_uint8	sql_parser.y.c	/^typedef unsigned char yytype_uint8;$/;"	t	file:
+yyunput	sql_parser.lex.c	/^    static void yyunput (int c, register char * yy_bp )$/;"	f	file:
+yyvs_alloc	sql_parser.y.c	/^  YYSTYPE yyvs_alloc;$/;"	m	union:yyalloc	file:
+yywrap	sql_parser.lex.c	341;"	d	file:

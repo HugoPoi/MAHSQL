@@ -1,8 +1,8 @@
 
 CC=gcc
-CFLAGS=-Wall -ggdb
+CFLAGS=-Wall -ggdb -I /usr/include/json/
 LDFLAGS=-ggdb
-LFLAGS=-ljson #--std=gnu99
+LFLAGS=-ljson --std=gnu99
 EXEC=sql_parser.exe
 
 all: $(EXEC)

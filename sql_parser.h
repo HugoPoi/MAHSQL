@@ -62,7 +62,8 @@
      INTEGER = 280,
      CHAR = 281,
      PRIMARY = 282,
-     KEY = 283
+     KEY = 283,
+     EXIT = 284
    };
 #endif
 
@@ -73,16 +74,16 @@ typedef union YYSTYPE
 {
 
 /* Line 2068 of yacc.c  */
-#line 101 "sql_parser.y"
+#line 168 "sql_parser.y"
  
 	double val;
 	char* var;
-    long nomb;
+    int nomb;
 
 
 
 /* Line 2068 of yacc.c  */
-#line 86 "sql_parser.tab.h"
+#line 87 "sql_parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
