@@ -24,12 +24,22 @@ item* attr_field_list = NULL;
 item* create_table_data_struct = NULL ;
 item* numbers_field = NULL ;
 static FILE* file_sql ;
+json_object* jroot ;
 //item* create_table_fields = NULL ;
 //item* create_table_values = NULL ;
 
 char* insert_tablename;
 
+int is_table_exist( char* tab_name ) ;
+json_object* get_description( json_object* table_in ) ;
+json_object* get_datas_array( json_object* table_in ) ;
+//void json_object_object_add2(struct json_object* jso, 
+//const char *key,struct json_object *val);
+int set_champs( json_object* dataArr, char* fields, char* values ) ;
+int set_empty_line( json_object* table_in ) ;
 int create_a_table( item* tables, item* fields, item* numbers_field ) ;
+json_object * get_table_idx( char * table_name ) ;
+int insert_into_table(item* table_in, item* field_list_in, item* variable_list_in);
 
 
 void erase_list(item* l) {	
@@ -57,6 +67,32 @@ item* reverse_list(item* l) {
     erase_list(l);
     return tmpl;
 }
+
+
+
+
+/******** watch out donot touch ****
+void json_object_object_add2(struct json_object* jso, const char *key,struct json_object *val)
+{
+// We lookup the entry and replace the value, rather than just deleting
+// and re-adding it, so the existing key remains valid.
+    json_object *existing_value = NULL;
+    struct lh_entry *existing_entry;
+     existing_entry = lh_table_lookup_entry(jso->o.c_object, (void*)key);
+     if (!existing_entry)
+     {
+        lh_table_insert(jso->o.c_object, strdup(key), val);
+        return;
+     }
+     existing_value = (void *)existing_entry->v;
+     if (existing_value)
+        json_object_put(existing_value);
+    existing_entry->v = val;
+}
+
+******** watch out donot touch ****/
+
+
 
 void reinit() {
 	erase_list(table_list);
@@ -122,37 +158,182 @@ void print_create_table2( ){
            field_names, type_struct, types_limits);
 
 }
+int insert_into_table(item* table_in, item* field_list_in, item* variable_list_in){
+    json_object * jtable = NULL ; 
+    json_object * jarray = NULL ; 
+
+    /*** get table requested **/
+    jtable = get_table_idx( table_in -> content ) ;  
+    if ( jtable == NULL ){
+        printf ( " failed to find the table \n" ) ;
+        return 1 ;
+    }
+    /*** get array index **/
+    jarray = get_datas_array( jtable ) ;
+    if ( jarray == NULL ){
+        printf ( " failed to find the datas \n" ) ;
+        return 1 ;
+    }
+    while ( field_list_in ){
+         set_champs( jarray,
+                    field_list_in -> content,
+                    variable_list_in -> content );
+         field_list_in     = field_list_in -> next ;
+         variable_list_in  = variable_list_in -> next ;
+    } 
+
+    printf( "the table is:%s\n", json_object_to_json_string( jtable ) );
+    set_empty_line( jtable ) ;
+
+    /*** save in the file ****/
+    file_sql = fopen("./database.json", "r+b" ) ;
+    if ( file_sql == NULL ){ 
+        printf( " file problem \n") ;
+        return 1 ;
+    }
+    long size  = strlen( json_object_to_json_string( jroot ) );
+    fseek( file_sql, 0, SEEK_SET ) ;
+    long res = fwrite(  json_object_to_json_string( jroot ), 
+                        sizeof( char ) , size, file_sql ) ; 
+    printf( " char written %ld\n", res ) ;
+    fclose( file_sql ) ;
+
+    return 0 ;
+}
+
+json_object * get_table_idx( char * table_name ) {
+     json_object_object_foreach( jroot, key, val ){
+        /** to be replace by strcasecmp **/
+        if ( 0 ==  strcmp( table_name, key ) ){
+            return val;
+        }
+    }
+    return NULL ;
+}
+/*** add empty_line in data array ****/
+int set_empty_line( json_object* table_in ){
+    json_object * array = get_datas_array( table_in ) ;
+    json_object * desc  = get_description( table_in ) ;
+    if ( (!array) || (!desc) ){
+        printf ( " problem de recup de donnees et-ou description \n" ) ;
+        return 1 ;
+    }
+    json_object_array_add ( array, desc  ) ;
+    return 0 ;
+}
+
+/*** setter les champs du json et oui je passe en français lol ***/
+int set_champs( json_object* dataArr, char* fields, char* values ) {
+    char * field[100] ;
+    char * value[100] ;
+    field[0] = '\0' ;
+    value[0] = '\0' ;
+    strcpy( field, fields ) ; 
+    strcpy( value, values ) ;
+    int array_length = json_object_array_length( dataArr ) ;
+    json_object * line = json_object_array_get_idx( dataArr,
+                                (array_length-1));
+    json_object_object_foreach( line, key, val ){
+        if ( strcmp( key, field ) == 0 ){
+            const char * tmpVal  = json_object_to_json_string( val ) ;
+            if ( !strcmp("integer", tmpVal) ){
+                int num  = atoi( value ) ;
+                if( !num && strcmp( "0", value ) ) {
+                    printf ( " integer was expected for value " ) ;
+                }
+                else{
+                    json_object_object_add( line, key, 
+                                json_object_new_string( value ) );
+                }
+            } 
+            else{
+                //json_object_object_add( val, key, 
+                printf( "val %s\n", json_object_to_json_string(val)  ) ;
+                json_object_object_add( line, key, json_object_new_string(value) ) ;
+                            
+            }
+        }
+    }
+
+    return 0 ;
+}
+
+/*** get description structuration ***/
+json_object* get_description( json_object* table_in ){
+    json_object_object_foreach( table_in, key, val ){
+        /** to be replace by strcasecmp **/
+        if ( 0 ==  strcmp( "description", key ) ){
+            return val;
+        }
+    }
+    return NULL ;
+}
+
+/*** get data array from some table ***/
+json_object* get_datas_array( json_object* table_in ){
+    json_object_object_foreach( table_in, key, val ){
+        /** to be replace by strcasecmp **/
+        if ( 0 ==  strcmp( "datas", key ) ){
+            if ( json_type_array == json_object_get_type( val ) ){
+            return val;
+            }else{
+                printf( "not an array !!!!!!!!!!!!!\n" ) ;
+            }
+        }
+    }
+    return NULL ;
+}
 
 /** create and json table object **/
 int create_a_table( item* tables, item* fields, item* datas_struct ){
-    json_object  * jobj         = json_object_new_object() ;
+    
+    /** check if the table already exist **/
+    if ( is_table_exist( tables -> content ) ){
+        printf( "Sorry this table already exist!\n" ) ;
+        return 0 ;
+    }
+    file_sql = fopen("./database.json", "r+b" ) ;
+    if ( file_sql == NULL ){ 
+        printf( " file problem \n") ;
+        return 1 ;
+    }
+
     json_object * champsproper = json_object_new_object() ;
     json_object * valuesArray  = json_object_new_array() ;
-    json_object * jobj2         = json_object_new_object() ;
+    json_object * jobj2        = json_object_new_object() ;
 
     while( fields != NULL ){
       json_object_object_add( champsproper, fields -> content,
                               json_object_new_string( datas_struct -> content ) ) ;
       fields = fields -> next ;
       datas_struct = datas_struct -> next ;
-      //if ( fields == NULL )
-       //break ;
+
     }
 
-    json_object_object_add( jobj2 , "description"     , champsproper ) ;
-    json_object_object_add( jobj2 , "datas"           , valuesArray  ) ;
-    json_object_object_add( jobj  , tables -> content , jobj2        ) ;
-    long size  = strlen( json_object_to_json_string( jobj ) ) ;
-    printf( " le json vaut: %s\n", json_object_to_json_string( jobj ) ) ;
+    json_object_object_add(jobj2, "description", champsproper);
+    json_object_array_add(valuesArray, champsproper ) ; 
+    json_object_object_add(jobj2, "datas", valuesArray);
+    json_object_object_add(jroot, tables -> content , jobj2);
+    long size  = strlen( json_object_to_json_string( jroot ) );
+    printf( " le json vaut: %s\n", 
+          json_object_to_json_string( jroot ) ) ;
     fseek( file_sql, 0, SEEK_SET ) ;
-    int res = fwrite(  json_object_to_json_string( jobj ), sizeof( char ) , size, file_sql ) ; 
-    //assert( res == 4 ) ;
+    long res = fwrite(  json_object_to_json_string( jroot ), 
+                        sizeof( char ) , size, file_sql ) ; 
     printf( " char written %ld\n", res ) ;
-    //json_objet * tabName = json_object_new_string(table_names) ;
+    fclose( file_sql ) ;
     return 0 ;
-
 }
 
+ int is_table_exist( char* tab_name ){
+    json_object_object_foreach( jroot, key, val ){
+        /** to be replace by strcasecmp **/
+        if ( 0 ==  strcmp( tab_name, key ) ){
+            return 1 ;
+        }
+    }
+    return 0 ;
+ }
 
 /*
 void print_create_table( ){
@@ -208,9 +389,14 @@ SENTENCE:
                 print_select();
             }
 	   | INSERT_SENTENCE{
+                        table_list = reverse_list(table_list);
 						field_list = reverse_list(field_list);
 						variable_list = reverse_list(variable_list);
-						print_insert(insert_tablename,print_list(field_list),print_list(variable_list));
+						print_insert(print_list(table_list),print_list(field_list),
+                                     print_list(variable_list));
+
+                        insert_into_table( table_list, 
+                        field_list, variable_list );
 		}
 		| UPDATE_SENTENCE{
 				value_field_list = reverse_list(value_field_list);
@@ -300,7 +486,7 @@ CONDITIONS:
 
 INSERT_SENTENCE:
                INSERT INTO VARIABLE PARENTHLEFT FIELD_LIST PARENTHRIGHT VALUES PARENTHLEFT VARIABLE_LIST PARENTHRIGHT{
-               insert_tablename = $3;
+                table_list = push_list($3, table_list) ;
                };
 	
 UPDATE_SENTENCE:
@@ -380,13 +566,32 @@ int yyerror(char *s) {
 
 int main(int argc , char** argv) {
 
-  file_sql = fopen("./database.json", "w+b" ) ;
-  if ( file_sql == NULL ) 
-   return 0 ;
+    long file_size = 0  ;
+    file_sql = fopen("./database.json", "r+b" ) ;
+    if ( file_sql == NULL ){ 
+        file_sql = fopen("./database.json", "w+b" ) ;
+        if ( file_sql == NULL ){
+          return 0 ;
+        }
+    }
 
-  //assert(file_sql != NULL) ;
-  yyparse();
-  fclose( file_sql ) ;
-  return 0;
+    /*** check if the file is empty 
+    ****and return at the beginning ***/
+    fseek(file_sql, 0, SEEK_END) ;
+    file_size = ftell(file_sql) ;
+    fseek(file_sql, 0, SEEK_SET) ;
+    if (file_size == 0){
+        printf( "the database is empty\n" ) ;
+        jroot = json_object_new_object() ;
+    }
+    else{
+      char * tmp_string = (char *) malloc( sizeof(char) * (file_size + 1) ) ;
+        /*** get main json object ***/
+        fread(tmp_string, sizeof(char), file_size, file_sql) ;
+        jroot = json_tokener_parse( tmp_string ) ;
+    }
+    fclose( file_sql ) ;
+    yyparse();
+    return 0;
 
 }
