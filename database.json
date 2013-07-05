@@ -1,1 +1,1 @@
-{ "md": { "description": { "nom": "coulibaly", "prenom": "mamadou" }, "datas": [ { "nom": "coulibaly", "prenom": "mamadou" }, { "nom": "coulibaly", "prenom": "mamadou" } ] } }
+{ "personne": { "description": { "nom": "varchar", "prenom": "varchar" }, "datas": [ { "nom": "coulibaly", "prenom": "mamadou" }, { "nom": "poissonnet", "prenom": "hugo" }, { "nom": "dubois", "prenom": "alex" }, { "nom": "varchar", "prenom": "varchar" } ] } }
