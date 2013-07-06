@@ -1,0 +1,11 @@
+
+/** good ****/
+create table md2 ( nom char, prenom char, address char, telephone char ) ; 
+insert into md2 ( nom, prenom ) values ( poissonn, mojs ) ;
+insert into md2 ( nom, prenom, address, telephone ) values ( coulibaly, mamadou, paris, fixe );
+select nom, prenom from md2;
+select nom, prenom from md2 where nom = poissonn ;
+select nom, prenom, telephone from md2 where nom = coulibaly OR  prenom = mojs  ;
+
+
+create table md3 ( nOm char, Prenom char, Address char, telEphone char ) ; 

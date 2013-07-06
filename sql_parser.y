@@ -19,27 +19,34 @@ item* table_list = NULL;
 item* field_list = NULL;
 item* variable_list = NULL;
 item* condition_list = NULL;
+item* and_or_list = NULL;
+item* resultSet = NULL ;
 item* value_field_list = NULL;
 item* attr_field_list = NULL;
 item* create_table_data_struct = NULL ;
 item* numbers_field = NULL ;
 static FILE* file_sql ;
 json_object* jroot ;
-//item* create_table_fields = NULL ;
-//item* create_table_values = NULL ;
 
 char* insert_tablename;
-
+int reiinit_json() ;
 int is_table_exist( char* tab_name ) ;
+int del_idx_from_array( json_object* dataArr, int idx ) ;
 json_object* get_description( json_object* table_in ) ;
+int no_select_condition(json_object* dataArr, item** field_listC) ;
 json_object* get_datas_array( json_object* table_in ) ;
-//void json_object_object_add2(struct json_object* jso, 
-//const char *key,struct json_object *val);
-int set_champs( json_object* dataArr, char* fields, char* values ) ;
+int check_cond3( json_object* dataArr, char* field , char* value );
+int check_cond( json_object* dataArr, item** field_listC, char* field, char* value ) ;
+int check_cond2( json_object* dataArr, item** field_listC, item** attr_in, char* field , char* value );
+int get_champs( json_object* dataArr, int row, char* champs ) ;
+int set_champs( json_object* dataArr, char* field, char* value ) ;
+int set_champs_update( json_object* dataArr,int iter, char* field, char* value ) ;
 int set_empty_line( json_object* table_in ) ;
 int create_a_table( item* tables, item* fields, item* numbers_field ) ;
 json_object * get_table_idx( char * table_name ) ;
 int insert_into_table(item* table_in, item* field_list_in, item* variable_list_in);
+int select_from_table(item* table_in, item* field_in, item* condition_in, item* and_or_list_in ) ;
+
 
 
 void erase_list(item* l) {	
@@ -68,52 +75,28 @@ item* reverse_list(item* l) {
     return tmpl;
 }
 
-
-
-
-/******** watch out donot touch ****
-void json_object_object_add2(struct json_object* jso, const char *key,struct json_object *val)
-{
-// We lookup the entry and replace the value, rather than just deleting
-// and re-adding it, so the existing key remains valid.
-    json_object *existing_value = NULL;
-    struct lh_entry *existing_entry;
-     existing_entry = lh_table_lookup_entry(jso->o.c_object, (void*)key);
-     if (!existing_entry)
-     {
-        lh_table_insert(jso->o.c_object, strdup(key), val);
-        return;
-     }
-     existing_value = (void *)existing_entry->v;
-     if (existing_value)
-        json_object_put(existing_value);
-    existing_entry->v = val;
-}
-
-******** watch out donot touch ****/
-
-
-
 void reinit() {
 	erase_list(table_list);
 	erase_list(field_list);
 	erase_list(condition_list);
+	erase_list(and_or_list);
 	erase_list(variable_list);
 	erase_list(value_field_list);
 	erase_list(attr_field_list);
-
-    /*** create table list handling ***/
+	erase_list(resultSet);
 	erase_list(create_table_data_struct);
-    create_table_data_struct = NULL ;
 	erase_list(numbers_field);
-    numbers_field = NULL ;
 
+    create_table_data_struct = NULL ;
+    numbers_field = NULL ;
 	table_list = NULL;
 	field_list = NULL;
+    and_or_list = NULL ;
 	variable_list = NULL;
 	condition_list = NULL;
 	value_field_list = NULL;
 	attr_field_list = NULL;
+    resultSet = NULL;
 }
 
 char* print_list(item* l) {
@@ -138,7 +121,7 @@ void print_select() {
 	char* field_names = print_list(field_list);
 	char* table_names = print_list(table_list);
 	char* conditions_names = print_list(condition_list);
-	printf("Select in %s\nFields:%s\nConditions:%s\n", table_names, field_names, conditions_names);
+	printf("Select in:%s\nFields:%s\nConditions:%s\n", table_names, field_names, conditions_names);
 }
 
 void print_insert(char* tablename,char* field_names,char* variable_names) {
@@ -158,6 +141,8 @@ void print_create_table2( ){
            field_names, type_struct, types_limits);
 
 }
+
+/************************************** insert handling *******************************************/
 int insert_into_table(item* table_in, item* field_list_in, item* variable_list_in){
     json_object * jtable = NULL ; 
     json_object * jarray = NULL ; 
@@ -175,14 +160,20 @@ int insert_into_table(item* table_in, item* field_list_in, item* variable_list_i
         return 1 ;
     }
     while ( field_list_in ){
-         set_champs( jarray,
+         int set = set_champs( jarray,
                     field_list_in -> content,
                     variable_list_in -> content );
          field_list_in     = field_list_in -> next ;
          variable_list_in  = variable_list_in -> next ;
+         if ( set || ( field_list_in && !variable_list_in ) || ( variable_list_in && !field_list_in ) ) {
+            printf( " error detected check your syntaxe \n" ) ;
+            return 1 ;
+         }
     } 
 
-    printf( "the table is:%s\n", json_object_to_json_string( jtable ) );
+    printf( "\nthe table after insert is:\n%s\n"
+    , json_object_to_json_string( jtable ) );
+
     set_empty_line( jtable ) ;
 
     /*** save in the file ****/
@@ -197,7 +188,7 @@ int insert_into_table(item* table_in, item* field_list_in, item* variable_list_i
                         sizeof( char ) , size, file_sql ) ; 
     printf( " char written %ld\n", res ) ;
     fclose( file_sql ) ;
-
+    reiinit_json() ;
     return 0 ;
 }
 
@@ -221,25 +212,49 @@ int set_empty_line( json_object* table_in ){
     json_object_array_add ( array, desc  ) ;
     return 0 ;
 }
+/****** set champs for the update *******/
+int set_champs_update( json_object* dataArr,int iter, char* field, char* value ){
+    //int array_length = json_object_array_length( dataArr ) ;
+    json_object * line = json_object_array_get_idx( dataArr, iter);
+
+    json_object_object_foreach( line, key, val ){
+        if ( strcmp( key, field ) == 0 ){
+            const char * tmpVal  = json_object_to_json_string( val ) ;
+            if ( strstr("integer", tmpVal) ){
+                int num  = atoi( value ) ;
+                if( !num && strcmp( "0", value ) ) {
+                    printf ( " integer was expected for value " ) ;
+                    return 1 ;
+                }
+                else{
+                    json_object_object_add( line, key, 
+                                json_object_new_string( value ) );
+                                return 0 ;
+                }
+            } 
+            else{
+                json_object_object_add( line, key, json_object_new_string(value) ) ;
+                return 0 ;
+            }
+        }
+    }
+
+    return 1 ;
+}
 
 /*** setter les champs du json et oui je passe en français lol ***/
-int set_champs( json_object* dataArr, char* fields, char* values ) {
-    char * field[100] ;
-    char * value[100] ;
-    field[0] = '\0' ;
-    value[0] = '\0' ;
-    strcpy( field, fields ) ; 
-    strcpy( value, values ) ;
+int set_champs( json_object* dataArr, char* field, char* value ) {
     int array_length = json_object_array_length( dataArr ) ;
     json_object * line = json_object_array_get_idx( dataArr,
                                 (array_length-1));
     json_object_object_foreach( line, key, val ){
         if ( strcmp( key, field ) == 0 ){
             const char * tmpVal  = json_object_to_json_string( val ) ;
-            if ( !strcmp("integer", tmpVal) ){
+            if ( strstr("integer", tmpVal) ){
                 int num  = atoi( value ) ;
                 if( !num && strcmp( "0", value ) ) {
                     printf ( " integer was expected for value " ) ;
+                    return 1 ;
                 }
                 else{
                     json_object_object_add( line, key, 
@@ -247,10 +262,7 @@ int set_champs( json_object* dataArr, char* fields, char* values ) {
                 }
             } 
             else{
-                //json_object_object_add( val, key, 
-                printf( "val %s\n", json_object_to_json_string(val)  ) ;
                 json_object_object_add( line, key, json_object_new_string(value) ) ;
-                            
             }
         }
     }
@@ -284,7 +296,322 @@ json_object* get_datas_array( json_object* table_in ){
     return NULL ;
 }
 
-/** create and json table object **/
+/**** check match between command field and cond ****/
+int check_fiel_cond_match( item ** fields, char * cond_field ) {
+    item* tmplist = *(fields) ;
+    while( tmplist ){
+        if ( strcmp( tmplist-> content , cond_field ) == 0 ){
+            return 1;
+        }
+        tmplist = tmplist -> next ;
+    } ;
+    return 0 ;
+
+}
+
+
+/*** check conditions ****/
+int check_cond( json_object* dataArr,item** field_listC, char* field, char* value ){
+    int array_length = json_object_array_length( dataArr ) ;
+    int iterArr = 0 ;
+    int check = check_fiel_cond_match( field_listC, field ) ; 
+    if( !check ){
+        printf( " field not valid\n" ) ;
+        return 1 ;
+    };
+    for( iterArr = 0; iterArr < array_length; iterArr++){ 
+
+    json_object * line = json_object_array_get_idx( dataArr, iterArr);
+        json_object_object_foreach( line, key, val ){
+         item* tmplist = *(field_listC)  ;
+            if ( strcmp( key, field )  == 0 ){
+                const char * tmp = json_object_to_json_string(
+                            json_object_new_string( value ) ) ;
+                const char * tmpVal = json_object_to_json_string( val ) ;
+                if(strcmp( tmp, tmpVal ) == 0 ){
+                    resultSet = push_list( "\nnew line match:\n", resultSet );
+                    while( tmplist ){
+                        int res = get_champs( dataArr, iterArr
+                                    , tmplist -> content ) ;
+                        if( res ){
+                            printf( " field not valid\n" ) ;
+                            return 1 ;
+                        }
+                        tmplist = tmplist -> next ;
+                    }
+                } 
+            }
+        }
+    }
+    return 0;
+
+}
+
+/******* check condition 2 for the update *********/
+int check_cond2( json_object* dataArr, item** field_listC, item** attr_in, char* field , char* value ){
+    int array_length = json_object_array_length( dataArr ) ;
+    int iterArr = 0 ;
+
+    for( iterArr = 0; iterArr < array_length; iterArr++){ 
+
+    json_object * line = json_object_array_get_idx( dataArr, iterArr);
+        json_object_object_foreach( line, key, val ){
+         item* tmplist = *(field_listC)  ;
+         item* tmpattr = *(attr_in)  ;
+            if ( strcmp( key, field )  == 0 ){
+                const char * tmp = json_object_to_json_string(
+                            json_object_new_string( value ) ) ;
+                const char * tmpVal = json_object_to_json_string( val ) ;
+                if(strcmp( tmp, tmpVal ) == 0 ){
+                    resultSet = push_list( "\nnew line match:\n", resultSet );
+                    while( tmplist ){
+                        int res = set_champs_update( dataArr, iterArr
+                                    , tmplist -> content, tmpattr -> content  ) ;
+
+                        if( res ){
+                            printf( " field not valid\n" ) ;
+                            return 1 ;
+                        }
+                        tmplist = tmplist -> next ;
+                        tmpattr = tmpattr -> next ;
+                    }
+                } 
+            }
+        }
+    }
+    return 0;
+
+}
+
+
+/**** condition check 3 for delete *****/
+int check_cond3( json_object* dataArr, char* field , char* value ){
+    int array_length = json_object_array_length( dataArr ) ;
+    int iterArr = 0 ;
+
+    for( iterArr = 0; iterArr < array_length; iterArr++){ 
+
+    json_object * line = json_object_array_get_idx( dataArr, iterArr);
+        json_object_object_foreach( line, key, val ){
+            if ( strcmp( key, field )  == 0 ){
+                const char * tmp = json_object_to_json_string(
+                            json_object_new_string( value ) ) ;
+                const char * tmpVal = json_object_to_json_string( val ) ;
+                if(strcmp( tmp, tmpVal ) == 0 ){
+                        int res = del_idx_from_array( dataArr, iterArr ) ;
+                        if( res ){
+                            printf( " field not valid\n" ) ;
+                            return 1 ;
+                    }
+                } 
+            }
+        }
+    }
+    return 0;
+
+}
+
+int no_select_condition(json_object* dataArr, item** field_listC){
+
+            int array_length = json_object_array_length( dataArr ) ;
+            int iterArr = 0 ;
+            for( iterArr = 0; iterArr < array_length-1 ; iterArr++){ 
+                item* tmplist = *(field_listC)  ;
+                resultSet = push_list( "\nnew line match:\n", resultSet );
+                    while( tmplist ){
+                        int res = get_champs( dataArr, iterArr
+                                    , tmplist -> content ) ;
+                        if( res ){
+                            printf( " field not valid\n" ) ;
+                            return 1 ;
+                        }
+                        tmplist = tmplist -> next ;
+                    }
+
+
+            }
+            return 0;
+
+}
+/**get certains field from some table ******/
+int get_champs( json_object* dataArr, int row, char* champs ) {
+            
+        json_object * line = json_object_array_get_idx( dataArr, row);
+        json_object_object_foreach( line, key, val ){
+            if ( strcmp( key, champs )  == 0 ){
+                resultSet = push_list( (char *) json_object_to_json_string( val ) 
+                                , resultSet ) ;
+                        return 0 ;
+                } 
+        }
+        
+        return 1 ;
+}
+
+
+
+/********************update table ****************************************************/
+int update_table( item* table_in, item* field_in, item* attr_in, item* condition_in ) {
+        
+json_object * jtable = NULL ; 
+    json_object * jarray = NULL ; 
+
+    /*** get table requested **/
+    jtable = get_table_idx( table_in -> content ) ;  
+    if ( jtable == NULL ){
+        printf ( " failed to find the table \n" ) ;
+        return 1 ;
+    }
+    /*** get array index **/
+    jarray = get_datas_array( jtable ) ;
+    if ( jarray == NULL ){
+        printf ( " failed to find the datas \n" ) ;
+        return 1 ;
+    }
+     while ( condition_in ){
+        if ( condition_in -> content  && condition_in -> next ){
+            char * cond_field = condition_in -> content ;
+            condition_in = condition_in -> next ;
+            char * cond_val   = condition_in -> content ;
+            int row = check_cond2( jarray, &field_in, &attr_in, cond_field , cond_val );
+            if ( row ){
+                printf ( " syntaxe error updata check fields and conds\n" ) ;
+                return 1 ;
+
+            }
+        }
+        condition_in  = condition_in -> next ;
+     }
+
+    /*** save in the file ****/
+    file_sql = fopen("./database.json", "r+b" ) ;
+    if ( file_sql == NULL ){ 
+        printf( " file problem \n") ;
+        return 1 ;
+    }
+    long size  = strlen( json_object_to_json_string( jroot ) );
+    fseek( file_sql, 0, SEEK_SET ) ;
+    long res = fwrite(  json_object_to_json_string( jroot ), 
+                        sizeof( char ) , size, file_sql ) ; 
+    printf( " char written %ld\n", res ) ;
+    fclose( file_sql ) ;
+    reiinit_json() ;
+    printf( " \nafter update table is: \n%s\n"
+        ,json_object_to_json_string( jroot )  ) ;
+
+    return 0 ;
+}
+
+/******************************************SELECT handling ************************************************/
+int select_from_table(item* table_in, item* field_in, item* condition_in, item* and_or_list_in ) {
+    json_object * jtable = NULL ; 
+    json_object * jarray = NULL ; 
+
+    /*** get table requested **/
+    jtable = get_table_idx( table_in -> content ) ;  
+    if ( jtable == NULL ){
+        printf ( " failed to find the table \n" ) ;
+        return 1 ;
+    }
+    /*** get array index **/
+    jarray = get_datas_array( jtable ) ;
+    if ( jarray == NULL ){
+        printf ( " failed to find the datas \n" ) ;
+        return 1 ;
+    }
+   if( condition_in ){ 
+     while ( condition_in ){
+        if ( condition_in -> content  && condition_in -> next ){
+            char * cond_field = condition_in -> content ;
+            condition_in = condition_in -> next ;
+            char * cond_val   = condition_in -> content ;
+            int row = check_cond( jarray, &field_in, cond_field , cond_val );
+            if ( row ){
+                printf ( " syntaxe error check fields and conds\n" ) ;
+                return 1 ;
+
+            }
+        }
+        condition_in  = condition_in -> next ;
+     }
+    }else{
+            //printf ( " no cond\n" ) ;
+            int row =  no_select_condition(jarray, &field_in );
+            if ( row ){
+                printf ( " syntaxe error check fields and conds\n" ) ;
+                return 1 ;
+            }
+
+
+    }
+    resultSet = reverse_list( resultSet ) ;
+    printf( "\nresultat du select:%s\n", print_list( resultSet ) ) ;
+    return 0 ; 
+}
+
+/****** delete object at the index from array ******/
+int del_idx_from_array( json_object* dataArr, int idx ) {
+
+    json_object * line = json_object_array_get_idx( dataArr, idx);
+    json_object_array_put_idx( dataArr, idx,json_object_new_object()) ;
+    return 0 ;
+}
+
+/****** delete from table *********************************************************************************/
+int delete_from_table( item* table_in, item* condition_in ){
+
+        
+    json_object * jtable = NULL ; 
+    json_object * jarray = NULL ; 
+
+    /*** get table requested **/
+    jtable = get_table_idx( table_in -> content ) ;  
+    if ( jtable == NULL ){
+        printf ( " failed to find the table \n" ) ;
+        return 1 ;
+    }
+    /*** get array index **/
+    jarray = get_datas_array( jtable ) ;
+    if ( jarray == NULL ){
+        printf ( " failed to find the datas \n" ) ;
+        return 1 ;
+    }
+     while ( condition_in ){
+        if ( condition_in -> content  && condition_in -> next ){
+            char * cond_field = condition_in -> content ;
+            condition_in = condition_in -> next ;
+            char * cond_val   = condition_in -> content ;
+            int row = check_cond3( jarray, cond_field , cond_val );
+            if ( row ){
+                printf ( " syntaxe error delete check fields and conds\n" ) ;
+                return 1 ;
+
+            }
+        }
+        condition_in  = condition_in -> next ;
+     }
+
+    /*** save in the file ****/
+    file_sql = fopen("./database.json", "r+b" ) ;
+    if ( file_sql == NULL ){ 
+        printf( " file problem \n") ;
+        return 1 ;
+    }
+    long size  = strlen( json_object_to_json_string( jroot ) );
+    fseek( file_sql, 0, SEEK_SET ) ;
+    long res = fwrite(  json_object_to_json_string( jroot ), 
+                        sizeof( char ) , size, file_sql ) ; 
+    printf( " char written %ld\n", res ) ;
+    fclose( file_sql ) ;
+    reiinit_json() ;
+    printf( " \nafter delete table is: \n%s\n"
+        ,json_object_to_json_string( jroot )  ) ;
+
+ 
+
+return 0;
+}
+/**********************************create and json table object ******************************************/
 int create_a_table( item* tables, item* fields, item* datas_struct ){
     
     /** check if the table already exist **/
@@ -315,13 +642,13 @@ int create_a_table( item* tables, item* fields, item* datas_struct ){
     json_object_object_add(jobj2, "datas", valuesArray);
     json_object_object_add(jroot, tables -> content , jobj2);
     long size  = strlen( json_object_to_json_string( jroot ) );
-    printf( " le json vaut: %s\n", 
+    printf( "\n\nla base apres ajout de table vaut: \n%s\n", 
           json_object_to_json_string( jroot ) ) ;
     fseek( file_sql, 0, SEEK_SET ) ;
-    long res = fwrite(  json_object_to_json_string( jroot ), 
+    fwrite(  json_object_to_json_string( jroot ), 
                         sizeof( char ) , size, file_sql ) ; 
-    printf( " char written %ld\n", res ) ;
     fclose( file_sql ) ;
+    reiinit_json() ;
     return 0 ;
 }
 
@@ -386,35 +713,40 @@ SENTENCE:
                 field_list = reverse_list(field_list);
                 table_list = reverse_list(table_list);
                 condition_list = reverse_list(condition_list);
-                print_select();
+                and_or_list = reverse_list(and_or_list ) ;
+               // print_select();
+                select_from_table( table_list, field_list, condition_list, and_or_list ) ;
             }
 	   | INSERT_SENTENCE{
                         table_list = reverse_list(table_list);
 						field_list = reverse_list(field_list);
 						variable_list = reverse_list(variable_list);
-						print_insert(print_list(table_list),print_list(field_list),
-                                     print_list(variable_list));
-
+						//print_insert(print_list(table_list)
+                        //,print_list(field_list),print_list(variable_list));
                         insert_into_table( table_list, 
                         field_list, variable_list );
 		}
 		| UPDATE_SENTENCE{
-				value_field_list = reverse_list(value_field_list);
+                table_list = reverse_list(table_list);
+				field_list = reverse_list(field_list);
+                condition_list = reverse_list(condition_list);
 				attr_field_list = reverse_list(attr_field_list);
-				print_update(insert_tablename,print_list(attr_field_list),print_list(value_field_list)) ;
+				//print_update(insert_tablename,print_list(attr_field_list),print_list(value_field_list)) ;
+                update_table( table_list, field_list, attr_field_list, condition_list ) ;
 		}
 		| DELETE_SENTENCE{
-						field_list = reverse_list(field_list);
+						//field_list = reverse_list(field_list);
 						table_list = reverse_list(table_list);
 						condition_list = reverse_list(condition_list);
-						print_select();
+						//print_select();
+                        delete_from_table( table_list, condition_list ) ;
 		}
 		| CREATE_SENTENCE{
                         field_list = reverse_list(field_list);
                         table_list = reverse_list(table_list);
                         create_table_data_struct = reverse_list(create_table_data_struct);
                         numbers_field = reverse_list(numbers_field);
-                        print_create_table2() ;
+                        //print_create_table2() ;
                         create_a_table( table_list, field_list, create_table_data_struct );
 		
 		}
@@ -466,6 +798,16 @@ VARIABLE_LIST:
              | VARIABLE
              { 
                   variable_list = push_list($1, variable_list);
+             }
+             |VARIABLE_LIST COMMA NOMBRE{
+                  char tmpStr[20] ;
+                  sprintf( tmpStr, "%d", $3 ) ;
+                  variable_list = push_list(( char*) tmpStr, variable_list);
+             }
+             |NOMBRE{
+                  char tmpStr[20] ;
+                  sprintf( tmpStr, "%d", $1 ) ;
+                  variable_list = push_list(( char*) tmpStr, variable_list);
              };
 
 CONDITION:
@@ -473,13 +815,16 @@ CONDITION:
          //char buffer[2000];
          //sprintf(buffer,"%s=%s",$1,$3);
          condition_list = push_list($1,condition_list);
+         condition_list = push_list($3,condition_list);
          }
          ;
 
 CONDITIONS:
           CONDITIONS AND CONDITION{
+            and_or_list = push_list("and", and_or_list );
           }
           |CONDITIONS OR CONDITION{
+            and_or_list = push_list("or", and_or_list );
           }
           | CONDITION{
           };
@@ -491,24 +836,24 @@ INSERT_SENTENCE:
 	
 UPDATE_SENTENCE:
                UPDATE VARIABLE SET ATTRIBUTIONS WHERE CONDITIONS{
-               insert_tablename = $2;
+                table_list = push_list($2, table_list) ;
                };
 
 ATTRIBUTIONS:
             ATTRIBUTIONS COMMA VARIABLE EQUAL VARIABLE 	
             { 
-                attr_field_list = push_list($3, attr_field_list);
-                value_field_list = push_list($5, value_field_list);
+                field_list = push_list($3, field_list);
+                attr_field_list = push_list($5, attr_field_list);
             }	  
             |VARIABLE EQUAL VARIABLE
             { 
-                attr_field_list = push_list($1, attr_field_list);
-                value_field_list = push_list($3, value_field_list);
+                field_list = push_list($1, field_list);
+                attr_field_list = push_list($3, attr_field_list);
             };
 	
 DELETE_SENTENCE:
-               DELETE FROM TABLE_LIST WHERE CONDITIONS{
-                 //table_list = push_list($3, table_list ) ;
+               DELETE FROM VARIABLE WHERE CONDITIONS{
+                 table_list = push_list($3, table_list ) ;
                };
 
 CREATE_SENTENCE:
@@ -561,7 +906,7 @@ EXIT_SENTENCE:
 int yyerror(char *s) {
   printf("%s\n",s);
   yyparse();
-  //return 1;
+  return 1 ;
 }
 
 int main(int argc , char** argv) {
@@ -589,9 +934,40 @@ int main(int argc , char** argv) {
         /*** get main json object ***/
         fread(tmp_string, sizeof(char), file_size, file_sql) ;
         jroot = json_tokener_parse( tmp_string ) ;
+        free( tmp_string ) ;
     }
     fclose( file_sql ) ;
     yyparse();
     return 0;
 
+}
+
+int reiinit_json(){
+    json_object_put(jroot);
+    file_sql = fopen("./database.json", "r+b" ) ;
+    if ( file_sql == NULL ){ 
+        file_sql = fopen("./database.json", "w+b" ) ;
+        if ( file_sql == NULL ){
+          return 0 ;
+        }
+    }
+
+    /*** check if the file is empty 
+    ****and return at the beginning ***/
+    fseek(file_sql, 0, SEEK_END) ;
+    long file_size = ftell(file_sql) ;
+    fseek(file_sql, 0, SEEK_SET) ;
+    if (file_size == 0){
+        printf( "the database is empty\n" ) ;
+        jroot = json_object_new_object() ;
+    }
+    else{
+      char * tmp_string = (char *) malloc( sizeof(char) * (file_size + 1) ) ;
+        /*** get main json object ***/
+        fread(tmp_string, sizeof(char), file_size, file_sql) ;
+        jroot = json_tokener_parse( tmp_string ) ;
+    }
+    fclose( file_sql ) ;
+
+    return 0;
 }

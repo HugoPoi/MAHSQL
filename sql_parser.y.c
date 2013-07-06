@@ -88,27 +88,34 @@ item* table_list = NULL;
 item* field_list = NULL;
 item* variable_list = NULL;
 item* condition_list = NULL;
+item* and_or_list = NULL;
+item* resultSet = NULL ;
 item* value_field_list = NULL;
 item* attr_field_list = NULL;
 item* create_table_data_struct = NULL ;
 item* numbers_field = NULL ;
 static FILE* file_sql ;
 json_object* jroot ;
-//item* create_table_fields = NULL ;
-//item* create_table_values = NULL ;
 
 char* insert_tablename;
-
+int reiinit_json() ;
 int is_table_exist( char* tab_name ) ;
+int del_idx_from_array( json_object* dataArr, int idx ) ;
 json_object* get_description( json_object* table_in ) ;
+int no_select_condition(json_object* dataArr, item** field_listC) ;
 json_object* get_datas_array( json_object* table_in ) ;
-//void json_object_object_add2(struct json_object* jso, 
-//const char *key,struct json_object *val);
-int set_champs( json_object* dataArr, char* fields, char* values ) ;
+int check_cond3( json_object* dataArr, char* field , char* value );
+int check_cond( json_object* dataArr, item** field_listC, char* field, char* value ) ;
+int check_cond2( json_object* dataArr, item** field_listC, item** attr_in, char* field , char* value );
+int get_champs( json_object* dataArr, int row, char* champs ) ;
+int set_champs( json_object* dataArr, char* field, char* value ) ;
+int set_champs_update( json_object* dataArr,int iter, char* field, char* value ) ;
 int set_empty_line( json_object* table_in ) ;
 int create_a_table( item* tables, item* fields, item* numbers_field ) ;
 json_object * get_table_idx( char * table_name ) ;
 int insert_into_table(item* table_in, item* field_list_in, item* variable_list_in);
+int select_from_table(item* table_in, item* field_in, item* condition_in, item* and_or_list_in ) ;
+
 
 
 void erase_list(item* l) {	
@@ -137,52 +144,28 @@ item* reverse_list(item* l) {
     return tmpl;
 }
 
-
-
-
-/******** watch out donot touch ****
-void json_object_object_add2(struct json_object* jso, const char *key,struct json_object *val)
-{
-// We lookup the entry and replace the value, rather than just deleting
-// and re-adding it, so the existing key remains valid.
-    json_object *existing_value = NULL;
-    struct lh_entry *existing_entry;
-     existing_entry = lh_table_lookup_entry(jso->o.c_object, (void*)key);
-     if (!existing_entry)
-     {
-        lh_table_insert(jso->o.c_object, strdup(key), val);
-        return;
-     }
-     existing_value = (void *)existing_entry->v;
-     if (existing_value)
-        json_object_put(existing_value);
-    existing_entry->v = val;
-}
-
-******** watch out donot touch ****/
-
-
-
 void reinit() {
 	erase_list(table_list);
 	erase_list(field_list);
 	erase_list(condition_list);
+	erase_list(and_or_list);
 	erase_list(variable_list);
 	erase_list(value_field_list);
 	erase_list(attr_field_list);
-
-    /*** create table list handling ***/
+	erase_list(resultSet);
 	erase_list(create_table_data_struct);
-    create_table_data_struct = NULL ;
 	erase_list(numbers_field);
-    numbers_field = NULL ;
 
+    create_table_data_struct = NULL ;
+    numbers_field = NULL ;
 	table_list = NULL;
 	field_list = NULL;
+    and_or_list = NULL ;
 	variable_list = NULL;
 	condition_list = NULL;
 	value_field_list = NULL;
 	attr_field_list = NULL;
+    resultSet = NULL;
 }
 
 char* print_list(item* l) {
@@ -207,7 +190,7 @@ void print_select() {
 	char* field_names = print_list(field_list);
 	char* table_names = print_list(table_list);
 	char* conditions_names = print_list(condition_list);
-	printf("Select in %s\nFields:%s\nConditions:%s\n", table_names, field_names, conditions_names);
+	printf("Select in:%s\nFields:%s\nConditions:%s\n", table_names, field_names, conditions_names);
 }
 
 void print_insert(char* tablename,char* field_names,char* variable_names) {
@@ -227,6 +210,8 @@ void print_create_table2( ){
            field_names, type_struct, types_limits);
 
 }
+
+/************************************** insert handling *******************************************/
 int insert_into_table(item* table_in, item* field_list_in, item* variable_list_in){
     json_object * jtable = NULL ; 
     json_object * jarray = NULL ; 
@@ -244,14 +229,20 @@ int insert_into_table(item* table_in, item* field_list_in, item* variable_list_i
         return 1 ;
     }
     while ( field_list_in ){
-         set_champs( jarray,
+         int set = set_champs( jarray,
                     field_list_in -> content,
                     variable_list_in -> content );
          field_list_in     = field_list_in -> next ;
          variable_list_in  = variable_list_in -> next ;
+         if ( set || ( field_list_in && !variable_list_in ) || ( variable_list_in && !field_list_in ) ) {
+            printf( " error detected check your syntaxe \n" ) ;
+            return 1 ;
+         }
     } 
 
-    printf( "the table is:%s\n", json_object_to_json_string( jtable ) );
+    printf( "\nthe table after insert is:\n%s\n"
+    , json_object_to_json_string( jtable ) );
+
     set_empty_line( jtable ) ;
 
     /*** save in the file ****/
@@ -266,7 +257,7 @@ int insert_into_table(item* table_in, item* field_list_in, item* variable_list_i
                         sizeof( char ) , size, file_sql ) ; 
     printf( " char written %ld\n", res ) ;
     fclose( file_sql ) ;
-
+    reiinit_json() ;
     return 0 ;
 }
 
@@ -290,25 +281,49 @@ int set_empty_line( json_object* table_in ){
     json_object_array_add ( array, desc  ) ;
     return 0 ;
 }
+/****** set champs for the update *******/
+int set_champs_update( json_object* dataArr,int iter, char* field, char* value ){
+    //int array_length = json_object_array_length( dataArr ) ;
+    json_object * line = json_object_array_get_idx( dataArr, iter);
+
+    json_object_object_foreach( line, key, val ){
+        if ( strcmp( key, field ) == 0 ){
+            const char * tmpVal  = json_object_to_json_string( val ) ;
+            if ( strstr("integer", tmpVal) ){
+                int num  = atoi( value ) ;
+                if( !num && strcmp( "0", value ) ) {
+                    printf ( " integer was expected for value " ) ;
+                    return 1 ;
+                }
+                else{
+                    json_object_object_add( line, key, 
+                                json_object_new_string( value ) );
+                                return 0 ;
+                }
+            } 
+            else{
+                json_object_object_add( line, key, json_object_new_string(value) ) ;
+                return 0 ;
+            }
+        }
+    }
+
+    return 1 ;
+}
 
 /*** setter les champs du json et oui je passe en français lol ***/
-int set_champs( json_object* dataArr, char* fields, char* values ) {
-    char * field[100] ;
-    char * value[100] ;
-    field[0] = '\0' ;
-    value[0] = '\0' ;
-    strcpy( field, fields ) ; 
-    strcpy( value, values ) ;
+int set_champs( json_object* dataArr, char* field, char* value ) {
     int array_length = json_object_array_length( dataArr ) ;
     json_object * line = json_object_array_get_idx( dataArr,
                                 (array_length-1));
     json_object_object_foreach( line, key, val ){
         if ( strcmp( key, field ) == 0 ){
             const char * tmpVal  = json_object_to_json_string( val ) ;
-            if ( !strcmp("integer", tmpVal) ){
+            if ( strstr("integer", tmpVal) ){
                 int num  = atoi( value ) ;
                 if( !num && strcmp( "0", value ) ) {
                     printf ( " integer was expected for value " ) ;
+                    return 1 ;
                 }
                 else{
                     json_object_object_add( line, key, 
@@ -316,10 +331,7 @@ int set_champs( json_object* dataArr, char* fields, char* values ) {
                 }
             } 
             else{
-                //json_object_object_add( val, key, 
-                printf( "val %s\n", json_object_to_json_string(val)  ) ;
                 json_object_object_add( line, key, json_object_new_string(value) ) ;
-                            
             }
         }
     }
@@ -353,7 +365,322 @@ json_object* get_datas_array( json_object* table_in ){
     return NULL ;
 }
 
-/** create and json table object **/
+/**** check match between command field and cond ****/
+int check_fiel_cond_match( item ** fields, char * cond_field ) {
+    item* tmplist = *(fields) ;
+    while( tmplist ){
+        if ( strcmp( tmplist-> content , cond_field ) == 0 ){
+            return 1;
+        }
+        tmplist = tmplist -> next ;
+    } ;
+    return 0 ;
+
+}
+
+
+/*** check conditions ****/
+int check_cond( json_object* dataArr,item** field_listC, char* field, char* value ){
+    int array_length = json_object_array_length( dataArr ) ;
+    int iterArr = 0 ;
+    int check = check_fiel_cond_match( field_listC, field ) ; 
+    if( !check ){
+        printf( " field not valid\n" ) ;
+        return 1 ;
+    };
+    for( iterArr = 0; iterArr < array_length; iterArr++){ 
+
+    json_object * line = json_object_array_get_idx( dataArr, iterArr);
+        json_object_object_foreach( line, key, val ){
+         item* tmplist = *(field_listC)  ;
+            if ( strcmp( key, field )  == 0 ){
+                const char * tmp = json_object_to_json_string(
+                            json_object_new_string( value ) ) ;
+                const char * tmpVal = json_object_to_json_string( val ) ;
+                if(strcmp( tmp, tmpVal ) == 0 ){
+                    resultSet = push_list( "\nnew line match:\n", resultSet );
+                    while( tmplist ){
+                        int res = get_champs( dataArr, iterArr
+                                    , tmplist -> content ) ;
+                        if( res ){
+                            printf( " field not valid\n" ) ;
+                            return 1 ;
+                        }
+                        tmplist = tmplist -> next ;
+                    }
+                } 
+            }
+        }
+    }
+    return 0;
+
+}
+
+/******* check condition 2 for the update *********/
+int check_cond2( json_object* dataArr, item** field_listC, item** attr_in, char* field , char* value ){
+    int array_length = json_object_array_length( dataArr ) ;
+    int iterArr = 0 ;
+
+    for( iterArr = 0; iterArr < array_length; iterArr++){ 
+
+    json_object * line = json_object_array_get_idx( dataArr, iterArr);
+        json_object_object_foreach( line, key, val ){
+         item* tmplist = *(field_listC)  ;
+         item* tmpattr = *(attr_in)  ;
+            if ( strcmp( key, field )  == 0 ){
+                const char * tmp = json_object_to_json_string(
+                            json_object_new_string( value ) ) ;
+                const char * tmpVal = json_object_to_json_string( val ) ;
+                if(strcmp( tmp, tmpVal ) == 0 ){
+                    resultSet = push_list( "\nnew line match:\n", resultSet );
+                    while( tmplist ){
+                        int res = set_champs_update( dataArr, iterArr
+                                    , tmplist -> content, tmpattr -> content  ) ;
+
+                        if( res ){
+                            printf( " field not valid\n" ) ;
+                            return 1 ;
+                        }
+                        tmplist = tmplist -> next ;
+                        tmpattr = tmpattr -> next ;
+                    }
+                } 
+            }
+        }
+    }
+    return 0;
+
+}
+
+
+/**** condition check 3 for delete *****/
+int check_cond3( json_object* dataArr, char* field , char* value ){
+    int array_length = json_object_array_length( dataArr ) ;
+    int iterArr = 0 ;
+
+    for( iterArr = 0; iterArr < array_length; iterArr++){ 
+
+    json_object * line = json_object_array_get_idx( dataArr, iterArr);
+        json_object_object_foreach( line, key, val ){
+            if ( strcmp( key, field )  == 0 ){
+                const char * tmp = json_object_to_json_string(
+                            json_object_new_string( value ) ) ;
+                const char * tmpVal = json_object_to_json_string( val ) ;
+                if(strcmp( tmp, tmpVal ) == 0 ){
+                        int res = del_idx_from_array( dataArr, iterArr ) ;
+                        if( res ){
+                            printf( " field not valid\n" ) ;
+                            return 1 ;
+                    }
+                } 
+            }
+        }
+    }
+    return 0;
+
+}
+
+int no_select_condition(json_object* dataArr, item** field_listC){
+
+            int array_length = json_object_array_length( dataArr ) ;
+            int iterArr = 0 ;
+            for( iterArr = 0; iterArr < array_length-1 ; iterArr++){ 
+                item* tmplist = *(field_listC)  ;
+                resultSet = push_list( "\nnew line match:\n", resultSet );
+                    while( tmplist ){
+                        int res = get_champs( dataArr, iterArr
+                                    , tmplist -> content ) ;
+                        if( res ){
+                            printf( " field not valid\n" ) ;
+                            return 1 ;
+                        }
+                        tmplist = tmplist -> next ;
+                    }
+
+
+            }
+            return 0;
+
+}
+/**get certains field from some table ******/
+int get_champs( json_object* dataArr, int row, char* champs ) {
+            
+        json_object * line = json_object_array_get_idx( dataArr, row);
+        json_object_object_foreach( line, key, val ){
+            if ( strcmp( key, champs )  == 0 ){
+                resultSet = push_list( (char *) json_object_to_json_string( val ) 
+                                , resultSet ) ;
+                        return 0 ;
+                } 
+        }
+        
+        return 1 ;
+}
+
+
+
+/********************update table ****************************************************/
+int update_table( item* table_in, item* field_in, item* attr_in, item* condition_in ) {
+        
+json_object * jtable = NULL ; 
+    json_object * jarray = NULL ; 
+
+    /*** get table requested **/
+    jtable = get_table_idx( table_in -> content ) ;  
+    if ( jtable == NULL ){
+        printf ( " failed to find the table \n" ) ;
+        return 1 ;
+    }
+    /*** get array index **/
+    jarray = get_datas_array( jtable ) ;
+    if ( jarray == NULL ){
+        printf ( " failed to find the datas \n" ) ;
+        return 1 ;
+    }
+     while ( condition_in ){
+        if ( condition_in -> content  && condition_in -> next ){
+            char * cond_field = condition_in -> content ;
+            condition_in = condition_in -> next ;
+            char * cond_val   = condition_in -> content ;
+            int row = check_cond2( jarray, &field_in, &attr_in, cond_field , cond_val );
+            if ( row ){
+                printf ( " syntaxe error updata check fields and conds\n" ) ;
+                return 1 ;
+
+            }
+        }
+        condition_in  = condition_in -> next ;
+     }
+
+    /*** save in the file ****/
+    file_sql = fopen("./database.json", "r+b" ) ;
+    if ( file_sql == NULL ){ 
+        printf( " file problem \n") ;
+        return 1 ;
+    }
+    long size  = strlen( json_object_to_json_string( jroot ) );
+    fseek( file_sql, 0, SEEK_SET ) ;
+    long res = fwrite(  json_object_to_json_string( jroot ), 
+                        sizeof( char ) , size, file_sql ) ; 
+    printf( " char written %ld\n", res ) ;
+    fclose( file_sql ) ;
+    reiinit_json() ;
+    printf( " \nafter update table is: \n%s\n"
+        ,json_object_to_json_string( jroot )  ) ;
+
+    return 0 ;
+}
+
+/******************************************SELECT handling ************************************************/
+int select_from_table(item* table_in, item* field_in, item* condition_in, item* and_or_list_in ) {
+    json_object * jtable = NULL ; 
+    json_object * jarray = NULL ; 
+
+    /*** get table requested **/
+    jtable = get_table_idx( table_in -> content ) ;  
+    if ( jtable == NULL ){
+        printf ( " failed to find the table \n" ) ;
+        return 1 ;
+    }
+    /*** get array index **/
+    jarray = get_datas_array( jtable ) ;
+    if ( jarray == NULL ){
+        printf ( " failed to find the datas \n" ) ;
+        return 1 ;
+    }
+   if( condition_in ){ 
+     while ( condition_in ){
+        if ( condition_in -> content  && condition_in -> next ){
+            char * cond_field = condition_in -> content ;
+            condition_in = condition_in -> next ;
+            char * cond_val   = condition_in -> content ;
+            int row = check_cond( jarray, &field_in, cond_field , cond_val );
+            if ( row ){
+                printf ( " syntaxe error check fields and conds\n" ) ;
+                return 1 ;
+
+            }
+        }
+        condition_in  = condition_in -> next ;
+     }
+    }else{
+            //printf ( " no cond\n" ) ;
+            int row =  no_select_condition(jarray, &field_in );
+            if ( row ){
+                printf ( " syntaxe error check fields and conds\n" ) ;
+                return 1 ;
+            }
+
+
+    }
+    resultSet = reverse_list( resultSet ) ;
+    printf( "\nresultat du select:%s\n", print_list( resultSet ) ) ;
+    return 0 ; 
+}
+
+/****** delete object at the index from array ******/
+int del_idx_from_array( json_object* dataArr, int idx ) {
+
+    json_object * line = json_object_array_get_idx( dataArr, idx);
+    json_object_array_put_idx( dataArr, idx,json_object_new_object()) ;
+    return 0 ;
+}
+
+/****** delete from table *********************************************************************************/
+int delete_from_table( item* table_in, item* condition_in ){
+
+        
+    json_object * jtable = NULL ; 
+    json_object * jarray = NULL ; 
+
+    /*** get table requested **/
+    jtable = get_table_idx( table_in -> content ) ;  
+    if ( jtable == NULL ){
+        printf ( " failed to find the table \n" ) ;
+        return 1 ;
+    }
+    /*** get array index **/
+    jarray = get_datas_array( jtable ) ;
+    if ( jarray == NULL ){
+        printf ( " failed to find the datas \n" ) ;
+        return 1 ;
+    }
+     while ( condition_in ){
+        if ( condition_in -> content  && condition_in -> next ){
+            char * cond_field = condition_in -> content ;
+            condition_in = condition_in -> next ;
+            char * cond_val   = condition_in -> content ;
+            int row = check_cond3( jarray, cond_field , cond_val );
+            if ( row ){
+                printf ( " syntaxe error delete check fields and conds\n" ) ;
+                return 1 ;
+
+            }
+        }
+        condition_in  = condition_in -> next ;
+     }
+
+    /*** save in the file ****/
+    file_sql = fopen("./database.json", "r+b" ) ;
+    if ( file_sql == NULL ){ 
+        printf( " file problem \n") ;
+        return 1 ;
+    }
+    long size  = strlen( json_object_to_json_string( jroot ) );
+    fseek( file_sql, 0, SEEK_SET ) ;
+    long res = fwrite(  json_object_to_json_string( jroot ), 
+                        sizeof( char ) , size, file_sql ) ; 
+    printf( " char written %ld\n", res ) ;
+    fclose( file_sql ) ;
+    reiinit_json() ;
+    printf( " \nafter delete table is: \n%s\n"
+        ,json_object_to_json_string( jroot )  ) ;
+
+ 
+
+return 0;
+}
+/**********************************create and json table object ******************************************/
 int create_a_table( item* tables, item* fields, item* datas_struct ){
     
     /** check if the table already exist **/
@@ -384,13 +711,13 @@ int create_a_table( item* tables, item* fields, item* datas_struct ){
     json_object_object_add(jobj2, "datas", valuesArray);
     json_object_object_add(jroot, tables -> content , jobj2);
     long size  = strlen( json_object_to_json_string( jroot ) );
-    printf( " le json vaut: %s\n", 
+    printf( "\n\nla base apres ajout de table vaut: \n%s\n", 
           json_object_to_json_string( jroot ) ) ;
     fseek( file_sql, 0, SEEK_SET ) ;
-    long res = fwrite(  json_object_to_json_string( jroot ), 
+    fwrite(  json_object_to_json_string( jroot ), 
                         sizeof( char ) , size, file_sql ) ; 
-    printf( " char written %ld\n", res ) ;
     fclose( file_sql ) ;
+    reiinit_json() ;
     return 0 ;
 }
 
@@ -416,7 +743,7 @@ void print_create_table( ){
 
 
 /* Line 268 of yacc.c  */
-#line 420 "sql_parser.tab.c"
+#line 747 "sql_parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -480,7 +807,7 @@ typedef union YYSTYPE
 {
 
 /* Line 293 of yacc.c  */
-#line 349 "sql_parser.y"
+#line 676 "sql_parser.y"
  
 	double val;
 	char* var;
@@ -489,7 +816,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 493 "sql_parser.tab.c"
+#line 820 "sql_parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -501,7 +828,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 505 "sql_parser.tab.c"
+#line 832 "sql_parser.tab.c"
 
 #ifdef short
 # undef short
@@ -720,16 +1047,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  21
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   78
+#define YYLAST   83
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  30
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  18
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  36
+#define YYNRULES  38
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  87
+#define YYNSTATES  89
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -779,8 +1106,8 @@ static const yytype_uint8 yyprhs[] =
 {
        0,     0,     3,     7,    10,    12,    14,    16,    18,    20,
       22,    27,    34,    38,    40,    44,    46,    50,    52,    56,
-      60,    64,    66,    77,    84,    90,    94,   100,   107,   111,
-     113,   119,   122,   128,   130,   132,   134
+      58,    62,    66,    70,    72,    83,    90,    96,   100,   106,
+     113,   117,   119,   125,   128,   134,   136,   138,   140
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
@@ -791,24 +1118,25 @@ static const yytype_int8 yyrhs[] =
       47,    -1,     6,    34,     7,    35,    -1,     6,    34,     7,
       35,    10,    38,    -1,    34,     8,     4,    -1,     4,    -1,
       35,     8,     4,    -1,     4,    -1,    36,     8,     4,    -1,
-       4,    -1,     4,    11,     4,    -1,    38,    12,    37,    -1,
-      38,    13,    37,    -1,    37,    -1,    14,    15,     4,    16,
-      34,    17,    18,    16,    36,    17,    -1,    19,     4,    20,
-      41,    10,    38,    -1,    41,     8,     4,    11,     4,    -1,
-       4,    11,     4,    -1,    21,     7,    35,    10,    38,    -1,
-      22,    23,     4,    16,    44,    17,    -1,    44,     8,    45,
-      -1,    45,    -1,     4,    46,    16,     5,    17,    -1,     4,
-      46,    -1,    27,    28,    16,     4,    17,    -1,    24,    -1,
-      25,    -1,    26,    -1,    29,    -1
+       4,    -1,    36,     8,     5,    -1,     5,    -1,     4,    11,
+       4,    -1,    38,    12,    37,    -1,    38,    13,    37,    -1,
+      37,    -1,    14,    15,     4,    16,    34,    17,    18,    16,
+      36,    17,    -1,    19,     4,    20,    41,    10,    38,    -1,
+      41,     8,     4,    11,     4,    -1,     4,    11,     4,    -1,
+      21,     7,     4,    10,    38,    -1,    22,    23,     4,    16,
+      44,    17,    -1,    44,     8,    45,    -1,    45,    -1,     4,
+      46,    16,     5,    17,    -1,     4,    46,    -1,    27,    28,
+      16,     4,    17,    -1,    24,    -1,    25,    -1,    26,    -1,
+      29,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   369,   369,   375,   384,   391,   401,   406,   412,   421,
-     425,   428,   433,   439,   447,   453,   462,   466,   472,   480,
-     482,   484,   488,   493,   498,   503,   510,   515,   520,   522,
-     526,   535,   539,   544,   547,   550,   555
+       0,   696,   696,   702,   711,   720,   729,   737,   744,   753,
+     757,   760,   765,   771,   779,   785,   794,   798,   802,   807,
+     814,   823,   826,   829,   833,   838,   843,   848,   855,   860,
+     865,   867,   871,   880,   884,   889,   892,   895,   900
 };
 #endif
 
@@ -844,18 +1172,18 @@ static const yytype_uint16 yytoknum[] =
 static const yytype_uint8 yyr1[] =
 {
        0,    30,    31,    31,    32,    32,    32,    32,    32,    32,
-      33,    33,    34,    34,    35,    35,    36,    36,    37,    38,
-      38,    38,    39,    40,    41,    41,    42,    43,    44,    44,
-      45,    45,    45,    46,    46,    46,    47
+      33,    33,    34,    34,    35,    35,    36,    36,    36,    36,
+      37,    38,    38,    38,    39,    40,    41,    41,    42,    43,
+      44,    44,    45,    45,    45,    46,    46,    46,    47
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     3,     2,     1,     1,     1,     1,     1,     1,
-       4,     6,     3,     1,     3,     1,     3,     1,     3,     3,
-       3,     1,    10,     6,     5,     3,     5,     6,     3,     1,
-       5,     2,     5,     1,     1,     1,     1
+       4,     6,     3,     1,     3,     1,     3,     1,     3,     1,
+       3,     3,     3,     1,    10,     6,     5,     3,     5,     6,
+       3,     1,     5,     2,     5,     1,     1,     1,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
@@ -863,22 +1191,22 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     0,     0,    36,     0,     0,     4,
+       0,     0,     0,     0,     0,     0,    38,     0,     0,     4,
        5,     6,     7,     8,     9,    13,     0,     0,     0,     0,
-       0,     1,     0,     3,     0,     0,     0,     0,    15,     0,
-       0,     2,    10,    12,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,    14,     0,    21,    26,     0,
-       0,     0,    29,    11,     0,    25,     0,    23,     0,     0,
-       0,    33,    34,    35,    31,     0,     0,    27,     0,     0,
-      18,    19,    20,     0,     0,    28,     0,    24,     0,     0,
-      17,     0,    30,    32,     0,    22,    16
+       0,     1,     0,     3,     0,     0,     0,     0,     0,     0,
+       2,    15,    10,    12,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,    23,    28,     0,     0,
+       0,    31,    14,    11,     0,    27,     0,    25,     0,     0,
+       0,    35,    36,    37,    33,     0,     0,    29,     0,     0,
+      20,    21,    22,     0,     0,    30,     0,    26,     0,     0,
+      17,    19,     0,    32,    34,     0,    24,    16,    18
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     7,     8,     9,    16,    29,    81,    47,    48,    10,
-      11,    36,    12,    13,    51,    52,    64,    14
+      -1,     7,     8,     9,    16,    32,    82,    46,    47,    10,
+      11,    36,    12,    13,    50,    51,    64,    14
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -886,22 +1214,22 @@ static const yytype_int8 yydefgoto[] =
 #define YYPACT_NINF -37
 static const yytype_int8 yypact[] =
 {
-      -4,     1,    -6,     9,    16,    12,   -37,     0,    34,   -37,
-     -37,   -37,   -37,   -37,   -37,   -37,    30,    40,    25,    42,
-      43,   -37,    39,   -37,    42,    45,    35,    46,   -37,    22,
-      36,   -37,    23,   -37,     1,    44,    26,    49,    50,    -3,
-      50,    -5,    52,    53,    50,   -37,    47,   -37,    27,     2,
-      31,    -1,   -37,    27,    48,   -37,    51,    27,    56,    50,
-      50,   -37,   -37,   -37,    54,    55,    -3,   -37,    57,    59,
-     -37,   -37,   -37,    60,    63,   -37,    64,   -37,    58,    61,
-     -37,     3,   -37,   -37,    65,   -37,   -37
+      -4,     1,    -6,     9,    16,    21,   -37,     0,    37,   -37,
+     -37,   -37,   -37,   -37,   -37,   -37,    27,    41,    28,    43,
+      45,   -37,    42,   -37,    46,    48,    38,    49,    47,    39,
+     -37,   -37,    22,   -37,     1,    50,    23,    52,    -3,    54,
+      52,    -5,    55,    56,    52,    51,   -37,    24,     2,    35,
+      -1,   -37,   -37,    24,    53,   -37,    57,    24,    60,    52,
+      52,   -37,   -37,   -37,    58,    59,    -3,   -37,    61,    62,
+     -37,   -37,   -37,    64,    63,   -37,    34,   -37,    65,    66,
+     -37,   -37,     3,   -37,   -37,    36,   -37,   -37,   -37
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -37,   -37,    67,   -37,    38,    37,   -37,   -18,   -36,   -37,
-     -37,   -37,   -37,   -37,   -37,    -2,   -37,   -37
+     -37,   -37,    69,   -37,    31,   -37,   -37,   -17,   -36,   -37,
+     -37,   -37,   -37,   -37,   -37,     4,   -37,   -37
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -910,14 +1238,15 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-      21,    49,     1,    25,    53,    15,     1,    66,    57,    17,
-       2,    84,    54,    18,     2,     3,    67,     4,     5,     3,
-      85,     4,     5,    19,    50,     6,    61,    62,    63,     6,
-      37,    37,    38,    40,    43,    20,    44,    24,    25,    59,
-      60,    71,    72,    23,    26,    27,    28,    30,    31,    33,
-      35,    34,    39,    45,    46,    42,    55,    56,    58,    65,
-      70,    32,    69,    77,    75,    78,    68,    79,    80,    86,
-      73,    74,    41,    76,    22,    82,     0,     0,    83
+      21,    48,     1,    25,    53,    15,     1,    66,    57,    17,
+       2,    85,    54,    18,     2,     3,    67,     4,     5,     3,
+      86,     4,     5,    19,    49,     6,    61,    62,    63,     6,
+      39,    43,    40,    44,    24,    25,    59,    60,    80,    81,
+      87,    88,    71,    72,    20,    26,    23,    28,    27,    29,
+      31,    30,    33,    35,    34,    38,    45,    37,    52,    55,
+      56,    42,    58,    65,    70,    41,    77,    79,    69,    78,
+      75,    68,     0,     0,    73,    74,    22,    76,     0,     0,
+       0,     0,    83,    84
 };
 
 #define yypact_value_is_default(yystate) \
@@ -931,11 +1260,12 @@ static const yytype_int8 yycheck[] =
        0,     4,     6,     8,    40,     4,     6,     8,    44,    15,
       14,     8,    17,     4,    14,    19,    17,    21,    22,    19,
       17,    21,    22,     7,    27,    29,    24,    25,    26,    29,
-       8,     8,    10,    10,     8,    23,    10,     7,     8,    12,
-      13,    59,    60,     9,     4,    20,     4,     4,     9,     4,
-       4,    16,    16,     4,     4,    11,     4,     4,    11,    28,
-       4,    24,    11,     4,    66,     5,    18,     4,     4,     4,
-      16,    16,    34,    16,     7,    17,    -1,    -1,    17
+       8,     8,    10,    10,     7,     8,    12,    13,     4,     5,
+       4,     5,    59,    60,    23,     4,     9,     4,    20,     4,
+       4,     9,     4,     4,    16,    16,     4,    10,     4,     4,
+       4,    11,    11,    28,     4,    34,     4,     4,    11,     5,
+      66,    18,    -1,    -1,    16,    16,     7,    16,    -1,    -1,
+      -1,    -1,    17,    17
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -944,13 +1274,13 @@ static const yytype_uint8 yystos[] =
 {
        0,     6,    14,    19,    21,    22,    29,    31,    32,    33,
       39,    40,    42,    43,    47,     4,    34,    15,     4,     7,
-      23,     0,    32,     9,     7,     8,     4,    20,     4,    35,
-       4,     9,    35,     4,    16,     4,    41,     8,    10,    16,
-      10,    34,    11,     8,    10,     4,     4,    37,    38,     4,
-      27,    44,    45,    38,    17,     4,     4,    38,    11,    12,
+      23,     0,    32,     9,     7,     8,     4,    20,     4,     4,
+       9,     4,    35,     4,    16,     4,    41,    10,    16,     8,
+      10,    34,    11,     8,    10,     4,    37,    38,     4,    27,
+      44,    45,     4,    38,    17,     4,     4,    38,    11,    12,
       13,    24,    25,    26,    46,    28,     8,    17,    18,    11,
        4,    37,    37,    16,    16,    45,    16,     4,     5,     4,
-       4,    36,    17,    17,     8,    17,     4
+       4,     5,    36,    17,    17,     8,    17,     4,     5
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1787,7 +2117,7 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 370 "sql_parser.y"
+#line 697 "sql_parser.y"
     {
                 //printf("Before reinit\n");
                 reinit();
@@ -1798,7 +2128,7 @@ yyreduce:
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 376 "sql_parser.y"
+#line 703 "sql_parser.y"
     {
                 //printf("Before reinit\n");
                 reinit();
@@ -1809,26 +2139,27 @@ yyreduce:
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 385 "sql_parser.y"
+#line 712 "sql_parser.y"
     {
                 field_list = reverse_list(field_list);
                 table_list = reverse_list(table_list);
                 condition_list = reverse_list(condition_list);
-                print_select();
+                and_or_list = reverse_list(and_or_list ) ;
+               // print_select();
+                select_from_table( table_list, field_list, condition_list, and_or_list ) ;
             }
     break;
 
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 391 "sql_parser.y"
+#line 720 "sql_parser.y"
     {
                         table_list = reverse_list(table_list);
 						field_list = reverse_list(field_list);
 						variable_list = reverse_list(variable_list);
-						print_insert(print_list(table_list),print_list(field_list),
-                                     print_list(variable_list));
-
+						//print_insert(print_list(table_list)
+                        //,print_list(field_list),print_list(variable_list));
                         insert_into_table( table_list, 
                         field_list, variable_list );
 		}
@@ -1837,36 +2168,40 @@ yyreduce:
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 401 "sql_parser.y"
+#line 729 "sql_parser.y"
     {
-				value_field_list = reverse_list(value_field_list);
+                table_list = reverse_list(table_list);
+				field_list = reverse_list(field_list);
+                condition_list = reverse_list(condition_list);
 				attr_field_list = reverse_list(attr_field_list);
-				print_update(insert_tablename,print_list(attr_field_list),print_list(value_field_list)) ;
+				//print_update(insert_tablename,print_list(attr_field_list),print_list(value_field_list)) ;
+                update_table( table_list, field_list, attr_field_list, condition_list ) ;
 		}
     break;
 
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 406 "sql_parser.y"
+#line 737 "sql_parser.y"
     {
-						field_list = reverse_list(field_list);
+						//field_list = reverse_list(field_list);
 						table_list = reverse_list(table_list);
 						condition_list = reverse_list(condition_list);
-						print_select();
+						//print_select();
+                        delete_from_table( table_list, condition_list ) ;
 		}
     break;
 
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 412 "sql_parser.y"
+#line 744 "sql_parser.y"
     {
                         field_list = reverse_list(field_list);
                         table_list = reverse_list(table_list);
                         create_table_data_struct = reverse_list(create_table_data_struct);
                         numbers_field = reverse_list(numbers_field);
-                        print_create_table2() ;
+                        //print_create_table2() ;
                         create_a_table( table_list, field_list, create_table_data_struct );
 		
 		}
@@ -1875,7 +2210,7 @@ yyreduce:
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 421 "sql_parser.y"
+#line 753 "sql_parser.y"
     {
         }
     break;
@@ -1883,7 +2218,7 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 426 "sql_parser.y"
+#line 758 "sql_parser.y"
     {
                }
     break;
@@ -1891,7 +2226,7 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 429 "sql_parser.y"
+#line 761 "sql_parser.y"
     {
                }
     break;
@@ -1899,7 +2234,7 @@ yyreduce:
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 434 "sql_parser.y"
+#line 766 "sql_parser.y"
     { 
                 //printf("Before field list\n");
                 field_list = push_list((yyvsp[(3) - (3)].var), field_list);
@@ -1910,7 +2245,7 @@ yyreduce:
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 440 "sql_parser.y"
+#line 772 "sql_parser.y"
     { 
                 //printf("Before field variable\n");
                 field_list = push_list((yyvsp[(1) - (1)].var), field_list);
@@ -1921,7 +2256,7 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 448 "sql_parser.y"
+#line 780 "sql_parser.y"
     {
             //printf("Before table list\n");
             table_list = push_list((yyvsp[(3) - (3)].var), table_list);
@@ -1932,7 +2267,7 @@ yyreduce:
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 454 "sql_parser.y"
+#line 786 "sql_parser.y"
     {
                 //printf("Before table variable\n");
                 table_list = push_list((yyvsp[(1) - (1)].var), table_list);
@@ -1943,7 +2278,7 @@ yyreduce:
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 463 "sql_parser.y"
+#line 795 "sql_parser.y"
     { 
                  variable_list = push_list((yyvsp[(3) - (3)].var), variable_list);
              }
@@ -1952,7 +2287,7 @@ yyreduce:
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 467 "sql_parser.y"
+#line 799 "sql_parser.y"
     { 
                   variable_list = push_list((yyvsp[(1) - (1)].var), variable_list);
              }
@@ -1961,114 +2296,139 @@ yyreduce:
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 472 "sql_parser.y"
+#line 802 "sql_parser.y"
     {
-         //char buffer[2000];
-         //sprintf(buffer,"%s=%s",$1,$3);
-         condition_list = push_list((yyvsp[(1) - (3)].var),condition_list);
-         }
+                  char tmpStr[20] ;
+                  sprintf( tmpStr, "%d", (yyvsp[(3) - (3)].nomb) ) ;
+                  variable_list = push_list(( char*) tmpStr, variable_list);
+             }
     break;
 
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 480 "sql_parser.y"
+#line 807 "sql_parser.y"
     {
-          }
+                  char tmpStr[20] ;
+                  sprintf( tmpStr, "%d", (yyvsp[(1) - (1)].nomb) ) ;
+                  variable_list = push_list(( char*) tmpStr, variable_list);
+             }
     break;
 
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 482 "sql_parser.y"
+#line 814 "sql_parser.y"
     {
-          }
+         //char buffer[2000];
+         //sprintf(buffer,"%s=%s",$1,$3);
+         condition_list = push_list((yyvsp[(1) - (3)].var),condition_list);
+         condition_list = push_list((yyvsp[(3) - (3)].var),condition_list);
+         }
     break;
 
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 484 "sql_parser.y"
+#line 823 "sql_parser.y"
     {
+            and_or_list = push_list("and", and_or_list );
           }
     break;
 
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 488 "sql_parser.y"
+#line 826 "sql_parser.y"
     {
-                table_list = push_list((yyvsp[(3) - (10)].var), table_list) ;
-               }
+            and_or_list = push_list("or", and_or_list );
+          }
     break;
 
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 493 "sql_parser.y"
+#line 829 "sql_parser.y"
     {
-               insert_tablename = (yyvsp[(2) - (6)].var);
-               }
+          }
     break;
 
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 499 "sql_parser.y"
-    { 
-                attr_field_list = push_list((yyvsp[(3) - (5)].var), attr_field_list);
-                value_field_list = push_list((yyvsp[(5) - (5)].var), value_field_list);
-            }
+#line 833 "sql_parser.y"
+    {
+                table_list = push_list((yyvsp[(3) - (10)].var), table_list) ;
+               }
     break;
 
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 504 "sql_parser.y"
-    { 
-                attr_field_list = push_list((yyvsp[(1) - (3)].var), attr_field_list);
-                value_field_list = push_list((yyvsp[(3) - (3)].var), value_field_list);
-            }
+#line 838 "sql_parser.y"
+    {
+                table_list = push_list((yyvsp[(2) - (6)].var), table_list) ;
+               }
     break;
 
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 510 "sql_parser.y"
-    {
-                 //table_list = push_list($3, table_list ) ;
-               }
+#line 844 "sql_parser.y"
+    { 
+                field_list = push_list((yyvsp[(3) - (5)].var), field_list);
+                attr_field_list = push_list((yyvsp[(5) - (5)].var), attr_field_list);
+            }
     break;
 
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 515 "sql_parser.y"
-    {
-                table_list = push_list((yyvsp[(3) - (6)].var), table_list) ;
-               }
+#line 849 "sql_parser.y"
+    { 
+                field_list = push_list((yyvsp[(1) - (3)].var), field_list);
+                attr_field_list = push_list((yyvsp[(3) - (3)].var), attr_field_list);
+            }
     break;
 
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 520 "sql_parser.y"
+#line 855 "sql_parser.y"
     {
-           }
+                 table_list = push_list((yyvsp[(3) - (5)].var), table_list ) ;
+               }
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 522 "sql_parser.y"
+#line 860 "sql_parser.y"
     {
-           }
+                table_list = push_list((yyvsp[(3) - (6)].var), table_list) ;
+               }
     break;
 
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 526 "sql_parser.y"
+#line 865 "sql_parser.y"
+    {
+           }
+    break;
+
+  case 31:
+
+/* Line 1806 of yacc.c  */
+#line 867 "sql_parser.y"
+    {
+           }
+    break;
+
+  case 32:
+
+/* Line 1806 of yacc.c  */
+#line 871 "sql_parser.y"
     {
                 //create_table_data_struct = push($1,create_table_data_struct) ;
                 field_list = push_list((yyvsp[(1) - (5)].var), field_list) ;
@@ -2080,56 +2440,56 @@ yyreduce:
             }
     break;
 
-  case 31:
+  case 33:
 
 /* Line 1806 of yacc.c  */
-#line 535 "sql_parser.y"
+#line 880 "sql_parser.y"
     {
                 field_list = push_list((yyvsp[(1) - (2)].var), field_list) ;
             
             }
     break;
 
-  case 32:
+  case 34:
 
 /* Line 1806 of yacc.c  */
-#line 539 "sql_parser.y"
+#line 884 "sql_parser.y"
     {
                 field_list = push_list((yyvsp[(4) - (5)].var), field_list) ;
             }
     break;
 
-  case 33:
-
-/* Line 1806 of yacc.c  */
-#line 544 "sql_parser.y"
-    {
-        create_table_data_struct  = push_list( (char * ) "varchar", create_table_data_struct ) ;
-    }
-    break;
-
-  case 34:
-
-/* Line 1806 of yacc.c  */
-#line 547 "sql_parser.y"
-    {
-        create_table_data_struct  = push_list( (char * ) "integer", create_table_data_struct ) ;
-             }
-    break;
-
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 550 "sql_parser.y"
+#line 889 "sql_parser.y"
     {
-        create_table_data_struct  = push_list( ( char * ) "char", create_table_data_struct ) ;
+        create_table_data_struct  = push_list( (char * ) "varchar", create_table_data_struct ) ;
     }
     break;
 
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 555 "sql_parser.y"
+#line 892 "sql_parser.y"
+    {
+        create_table_data_struct  = push_list( (char * ) "integer", create_table_data_struct ) ;
+             }
+    break;
+
+  case 37:
+
+/* Line 1806 of yacc.c  */
+#line 895 "sql_parser.y"
+    {
+        create_table_data_struct  = push_list( ( char * ) "char", create_table_data_struct ) ;
+    }
+    break;
+
+  case 38:
+
+/* Line 1806 of yacc.c  */
+#line 900 "sql_parser.y"
     {
              return 0 ;
              }
@@ -2138,7 +2498,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 2142 "sql_parser.tab.c"
+#line 2502 "sql_parser.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2369,13 +2729,13 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 559 "sql_parser.y"
+#line 904 "sql_parser.y"
 
 
 int yyerror(char *s) {
   printf("%s\n",s);
   yyparse();
-  //return 1;
+  return 1 ;
 }
 
 int main(int argc , char** argv) {
@@ -2403,10 +2763,41 @@ int main(int argc , char** argv) {
         /*** get main json object ***/
         fread(tmp_string, sizeof(char), file_size, file_sql) ;
         jroot = json_tokener_parse( tmp_string ) ;
+        free( tmp_string ) ;
     }
     fclose( file_sql ) ;
     yyparse();
     return 0;
 
+}
+
+int reiinit_json(){
+    json_object_put(jroot);
+    file_sql = fopen("./database.json", "r+b" ) ;
+    if ( file_sql == NULL ){ 
+        file_sql = fopen("./database.json", "w+b" ) ;
+        if ( file_sql == NULL ){
+          return 0 ;
+        }
+    }
+
+    /*** check if the file is empty 
+    ****and return at the beginning ***/
+    fseek(file_sql, 0, SEEK_END) ;
+    long file_size = ftell(file_sql) ;
+    fseek(file_sql, 0, SEEK_SET) ;
+    if (file_size == 0){
+        printf( "the database is empty\n" ) ;
+        jroot = json_object_new_object() ;
+    }
+    else{
+      char * tmp_string = (char *) malloc( sizeof(char) * (file_size + 1) ) ;
+        /*** get main json object ***/
+        fread(tmp_string, sizeof(char), file_size, file_sql) ;
+        jroot = json_tokener_parse( tmp_string ) ;
+    }
+    fclose( file_sql ) ;
+
+    return 0;
 }
 

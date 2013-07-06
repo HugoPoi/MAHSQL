@@ -58,7 +58,11 @@ variable  [a-z]+[a-zA-Z0-9*]+
     }
 
 {variable}    {
-	yylval.var=(char*)strdup(yytext);
+    int size = strlen( yytext ) ;
+    char * tmptext = (char *) malloc( sizeof(char) + (size+1) ) ;
+    tmptext[0] = '\0';
+    strcpy( tmptext, yytext ) ;
+	yylval.var= tmptext ; //strdup(yytext);
     //printf("Variable found: %s\n", yylval.var);
 	return(VARIABLE);
     }

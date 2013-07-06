@@ -1044,17 +1044,21 @@ case 28:
 YY_RULE_SETUP
 #line 60 "sql_parser.l"
 {
-	yylval.var=(char*)strdup(yytext);
+    int size = strlen( yytext ) ;
+    char * tmptext = (char *) malloc( sizeof(char) + (size+1) ) ;
+    tmptext[0] = '\0';
+    strcpy( tmptext, yytext ) ;
+	yylval.var= tmptext ; //strdup(yytext);
     //printf("Variable found: %s\n", yylval.var);
 	return(VARIABLE);
     }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 66 "sql_parser.l"
+#line 70 "sql_parser.l"
 ECHO;
 	YY_BREAK
-#line 1058 "lex.yy.c"
+#line 1062 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2052,4 +2056,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 66 "sql_parser.l"
+#line 70 "sql_parser.l"
