@@ -25,3 +25,5 @@
     select nom, prenom, telephone from md2 where nom = coulibaly OR  prenom = mojs  ;
     UPDATE md2 SET nom=poissonnet WHERE nom = poissonn ;
     DELETE FROM md2 WHERE  nom = poissonnet ;
+
+    /*** now handle libraries issues just go under linux noobs and launch make ****/
